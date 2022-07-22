@@ -1,12 +1,12 @@
+import pandas as pd
+import numpy as np
+from scipy.stats import norm
 
 # 计算个股月风险价值:历史模拟法和方差-协方差法的平均值
-def var(stock):
-    import numpy as np
-    import pandas as pd
-    from pandas_datareader import data
-    from scipy.stats import norm
+def var(data):
 
-    data = data.DataReader(stock ,start='2016' ,end='2020' ,data_source='yahoo')
+    #data = data.DataReader(stock ,start='2016' ,end='2020' ,data_source='yahoo')
+    # data = pd.read_csv(f'StockData/{stock}.csv')
 
     redata = data['Close'].sort_index(ascending=True)
     redata = pd.DataFrame(redata)
@@ -28,14 +28,10 @@ def var(stock):
 
 
 # 为风险承受力高的用户筛选极端收益可能更高的股票
-def gain(stock):
-    from pandas_datareader import data
-    import numpy as np
-    import pandas as pd
-    from scipy.stats import norm
+def gain(data2):
     # 计算极端收益
-    data2 = data.DataReader(stock, start='2016', end='2020', data_source='yahoo')
-
+    #data2 = data.DataReader(stock, start='2016', end='2020', data_source='yahoo')
+    # data2 = pd.read_csv(f'StockData/{stock}.csv')
     redata2 = data2['Close'].sort_index(ascending=True)
     redata2 = pd.DataFrame(redata2)
     redata2['Date'] = redata2.index
@@ -57,9 +53,9 @@ def gain(stock):
 
 
 #筛选长线股票
-def longterm(stock):
-    from pandas_datareader import data
-    longdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+def longterm(longdata):
+    #longdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+    # longdata = pd.read_csv(f'StockData/{stock}.csv')
     longdata['ma120']=longdata['Adj Close'].rolling(120).mean()
     longdata['ma60']=longdata['Adj Close'].rolling(60).mean()
     if  longdata.ma120[-1]>longdata.ma60[-1] or longdata.ma60.rolling(5).mean()[-1]>longdata.ma60.rolling(2).mean()[-1]:
@@ -70,9 +66,9 @@ def longterm(stock):
         return True
 
  #筛选中线股票
-def midterm(stock):
-    from pandas_datareader import data
-    middata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+def midterm(middata):
+    #middata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+
     middata['ma30']= middata['Adj Close'].rolling(30).mean()
     middata['ma20'] = middata['Adj Close'].rolling(20).mean()
     if middata.ma30[-1]>middata.ma20[-1] or middata.ma20.rolling(5).mean()[-1]>middata.ma20.rolling(2).mean()[-1]:
@@ -84,9 +80,10 @@ def midterm(stock):
 
 
   #筛选短线股票
-def shortterm(stock):
+def shortterm(shortdata):
     from pandas_datareader import data
-    shortdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+    #shortdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
+    # shortdata = pd.read_csv(f'StockData/{stock}.csv')
     shortdata['ma10'] =  shortdata['Adj Close'].rolling(10).mean()
     shortdata['ma5'] =   shortdata['Adj Close'].rolling(5).mean()
     shortdata['amplitude'] = (shortdata['High'] - shortdata['Low'])/shortdata['Close'].shift(1)
@@ -126,46 +123,69 @@ def coarse_sizing(stocks):
     risk3long = []
     risk3mid = []
     risk3short = []
-    for stock in stocks:
-        myvar = var(stock)
-        if myvar > -0.1:
-            if longterm(stock):
-                risk0long.append(stock)
-                risk1long.append(stock)
-                risk2long.append(stock)
-            if midterm(stock):
-                risk0mid.append(stock)
-                risk1mid.append(stock)
-                risk2mid.append(stock)
-            if shortterm(stock):
-                risk0short.append(stock)
-                risk1short.append(stock)
-                risk2short.append(stock)
-        elif myvar > -0.15:
-            if longterm(stock):
-                risk1long.append(stock)
-                risk2long.append(stock)
-            if midterm(stock):
-                risk1mid.append(stock)
-                risk2mid.append(stock)
-            if shortterm(stock):
-                risk1short.append(stock)
-                risk2short.append(stock)
-        elif myvar > -0.2:
-            if longterm(stock):
-                risk2long.append(stock)
-            if midterm(stock):
-                risk2mid.append(stock)
-            if shortterm(stock):
-                risk1short.append(stock)
 
-        mygain = gain(stock)
-        if mygain > 0.1:
-            if longterm(stock):
-                risk3long.append(stock)
-            if midterm(stock):
-                risk3mid.append(stock)
-            if shortterm(stock):
-                risk3short.append(stock)
-    print(risk0long, risk0mid, risk0short, risk1long, risk1mid, risk1short,
-          risk2long, risk2mid, risk2short, risk3long, risk3mid, risk3short)
+
+    for code in stocks:
+        try:
+            stock = pd.read_csv(f'StockData/{code}.csv')
+            myvar = var(stock)
+            if myvar > -0.1:
+                if longterm(stock):
+                    risk0long.append(stock)
+                    risk1long.append(stock)
+                    risk2long.append(stock)
+                if midterm(stock):
+                    risk0mid.append(stock)
+                    risk1mid.append(stock)
+                    risk2mid.append(stock)
+                if shortterm(stock):
+                    risk0short.append(stock)
+                    risk1short.append(stock)
+                    risk2short.append(stock)
+            elif myvar > -0.15:
+                if longterm(stock):
+                    risk1long.append(stock)
+                    risk2long.append(stock)
+                if midterm(stock):
+                    risk1mid.append(stock)
+                    risk2mid.append(stock)
+                if shortterm(stock):
+                    risk1short.append(stock)
+                    risk2short.append(stock)
+            elif myvar > -0.2:
+                if longterm(stock):
+                    risk2long.append(stock)
+                if midterm(stock):
+                    risk2mid.append(stock)
+                if shortterm(stock):
+                    risk1short.append(stock)
+
+            mygain = gain(stock)
+            if mygain > 0.1:
+                if longterm(stock):
+                    risk3long.append(stock)
+                if midterm(stock):
+                    risk3mid.append(stock)
+                if shortterm(stock):
+                    risk3short.append(stock)
+        except :
+            pass
+
+    return [risk0long, risk0mid, risk0short, risk1long, risk1mid, risk1short,
+          risk2long, risk2mid, risk2short, risk3long, risk3mid, risk3short]
+
+
+#对股票进行分类
+import json
+STOCK_LIST = pd.read_csv('Runes_clean.csv')['Rune']
+json_file_path = 'classification.json'
+json_file = open(json_file_path, mode='w')
+result = coarse_sizing(STOCK_LIST)
+json_content = []
+for i in range(len(result)):
+    json_content.append({i:result[i]})
+
+print(json)
+
+json.dump(json_content, json_file, indent=4)
+# json.dump(save_json_content, json_file, ensure_ascii=False, indent=4) # 保存中文

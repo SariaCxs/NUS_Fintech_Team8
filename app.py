@@ -17,10 +17,14 @@ from flask import (
 )
 import pandas as pd
 from pandas_datareader import data
+import json
 from util.getInvestType import InvestSurvey
 app = Flask(__name__)
 
 CODE_LIST = pd.read_csv("./data/test_data.csv")['Rune']
+with open('./data/classification.json','r',encoding='utf8')as fp:
+    CLASSIFICATION = json.load(fp)[0]
+
 filter = Filter()
 sorter = Sorter()
 survey_helper = InvestSurvey()
@@ -49,10 +53,8 @@ def survey():
         answers = []
         for arg in survey_args:
             answers.append(int(request.form.get(arg)))
-        type = survey_helper.getType(answers)
-        result = daily_data
-        cols = [key for key in result[0].keys()]
-        return redirect(url_for('recommend', type=type))
+        type, score = survey_helper.getType(answers)
+        return redirect(url_for('recommend', type=type,score=score))
 
     return render_template('survey.html')
 
@@ -60,8 +62,11 @@ def survey():
 @app.route('/recommend',methods=['GET','POST'])
 def recommend():
     type = request.args.get('type')
+    score = request.args.get('score')
     #fetch data according to type
-    result = daily_data
+    result = []
+    for code in CLASSIFICATION[str(score)]:
+        result.append(df2dic(code,data[code]))
     cols = [key for key in result[0].keys()]
 
     return render_template('recommend.html', type=type, stocks=result, cols=cols)
@@ -164,7 +169,7 @@ def fetch_data():
     for stock in CODE_LIST:
         try:
             STOCK_DATA = pd.read_csv("./data/StockData/" + stock + ".csv")
-            STOCK_DATA = STOCK_DATA.round(2)
+            STOCK_DATA = STOCK_DATA.iloc[-60:].round(2)
             data[stock] = STOCK_DATA
             daily_data.append(df2dic(stock,STOCK_DATA))
 
