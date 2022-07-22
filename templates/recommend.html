@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %} Stock Funnel- Customized Recommendation{% endblock %}
+
+{% block content %}
+
+<div class="row bg-light rounded  justify-content-center mx-4">
+    <div class="col-md-12 pt-4 px-4"> 
+        <h3>Your Customized Stock Funnel</h3>
+        <p>From the previous questionnaire, we obtained your investment type as <mark>{{type}}</mark>.
+            <br>And according to your type, we recommend the following stock for you. Stocks are ranked ascend in Rise.
+        </p>
+        <form method="post">
+            <h5>Time Period</h5>
+            <select name="sel" class="form-select mb-3" aria-label="Default select example">
+                <option value="1">One week</option>
+                <option value="2">One month</option>
+                <option value="3">Six months</option>
+            </select>
+            <h5>Rank ascend by</h5>
+            <select name='sort' class="form-select mb-3" aria-label="Default select example">
+                <option value=""></option>
+                <option value="rise">rise</option>
+                <option value="return">return</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <hr>
+        <h6 >Result</h6>
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                {% for col in cols %}
+                    <th scope="col">{{col}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <th scope="row"> {{stock.code}}</th>
+                {% for col in cols[1:] %}
+                    <th>{{stock[col]}}</th>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+    </div>
+    
+</div>
+{% endblock %}
