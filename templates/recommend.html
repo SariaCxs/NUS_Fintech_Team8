@@ -38,7 +38,7 @@
         <tbody>
             {% for stock in stocks %}
             <tr>
-                <th scope="row"> {{stock.code}}</th>
+                <th scope="row"><a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='High Low') }}">{{stock.code}}</a></th>
                 {% for col in cols[1:] %}
                     <th>{{stock[col]}}</th>
                 {% endfor %}

@@ -40,11 +40,6 @@ is_fetch = 0
 
 @app.route('/',methods=['GET'])
 def main():
-    global is_fetch
-    # 我简单写了个判断来执行fetch_data()
-    if is_fetch == 0:
-        fetch_data()
-        is_fetch = 1
     return render_template('main.html')
 
 @app.route("/survey",methods=['GET','POST'])
@@ -103,6 +98,8 @@ def search():
         enddate = request.form['enddate']
         col = request.form['col']
         # 接受用户参数传入
+        if startdate > enddate:
+            return render_template('404.html')
         return redirect(url_for('search_result', stockcode=stockcode, startdate=startdate, enddate=enddate, col=col))
     return render_template('search.html')
 
@@ -119,14 +116,16 @@ def search_result():
     col = col.split(" ")
 
     # 画图函数
-    plt.close()  # 关掉上一次请求时的图片
+    plt.switch_backend('agg') 
+    plt.clf() # 关掉上一次请求时的图片
     style.use('ggplot')
-    mpl.rc('figure', figsize=(9, 5))
+    mpl.rc('figure', dpi=120)
     for each_col in col:
         plt.plot(data[each_col], label=each_col)
     plt.legend()
+    plt.title("The Search Result of " + stockcode)
     plt.xlabel("Date")
-    plt.ylabel("Doller")
+    plt.ylabel("Dollar")
 
     # 将画出的图推给前端
     buffer = BytesIO()
@@ -142,12 +141,12 @@ def search_result():
 def contact():
     return render_template('contact.html')
 
-#404页面
-@app.route('/404', methods=('GET', 'POST'))
-def forbid():
-    return render_template('404.html')
-
-
+@app.before_request
+def if_fetch():
+    global is_fetch
+    if is_fetch == 0:
+        fetch_data()
+        is_fetch = 1
 
 def parse_user_type(answers):
     type = ['Cautious', 'steady', 'active','aggressive']

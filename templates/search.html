@@ -10,22 +10,22 @@
             <form method="post">
                 <div class="mb-3">
                     <label for="stockcode" class="form-label">Stock Code</label>
-                    <input class="form-control" name="stockcode" id="stockcode" aria-describedby="CodeHelp">
-                    <div id="CodeHelp" class="form-text">The format like '00001.sz' or 'TSLA'.</div>
+                    <input class="form-control" name="stockcode" id="stockcode" aria-describedby="CodeHelp" required>
+                    <div id="CodeHelp" class="form-text">The format like 'TSLA'.</div>
                 </div>
                 <div class="mb-3">
-                    <label for="startdate" class="form-label">StartDate</label>
-                    <input class="form-control" name="startdate" id="startdate" aria-describedby="DateHelp">
-                    <div id="DateHelp" class="form-text">The format like '2020-11-10'.</div>
+                    <label for="startdate" class="form-label">Start Date</label>
+                    <input class="form-control" name="startdate" id="startdate" aria-describedby="DateHelp" required>
+                    <div id="DateHelp" class="form-text">The format like '2020-11-10', If you do not select a time range, we will automatically display the last 2 months of data for you.</div>
                 </div>
                 <div class="mb-3">
-                    <label for="enddate" class="form-label" >EndDate</label>
-                    <input class="form-control" name="enddate" id="enddate" aria-describedby="DateHelp">
-                    <div id="DateHelp" class="form-text">The format like '2020-11-10'.</div>
+                    <label for="enddate" class="form-label" >End Date</label>
+                    <input class="form-control" name="enddate" id="enddate" aria-describedby="DateHelp" required>
+                    <div id="DateHelp" class="form-text">The requirement just like the "Start Date".</div>
                 </div>
                 <div class="mb-3">
                     <label for="col" class="form-label" >Data</label>
-                    <input class="form-control" name="col" id="col" aria-describedby="colHelp">
+                    <input class="form-control" name="col" id="col" aria-describedby="colHelp" required>
                     <div id="colHelp" class="form-text">Please enter the data you want to search in this row, either "Open", "High" "Low", "Close", " Adj Close" or Volume. If you want to search more than one kind of data, please separate them with a space.</div>
                 </div>
                 <button type="submit" class="btn btn-primary">Search</button>
