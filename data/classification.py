@@ -113,7 +113,6 @@ def shortterm(stock):
 
 
 # 根据投资偏好筛选
-
 def coarse_sizing(stocks):
     risk0long = []
     risk0mid = []
