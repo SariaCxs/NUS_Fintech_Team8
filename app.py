@@ -21,9 +21,10 @@ import json
 from util.getInvestType import InvestSurvey
 app = Flask(__name__)
 
-CODE_LIST = pd.read_csv("./data/test_data.csv")['Rune']
+CODE_LIST = pd.read_csv("./data/Runes_clean.csv")['Rune']
 with open('./data/classification.json','r',encoding='utf8')as fp:
-    CLASSIFICATION = json.load(fp)[0]
+    CLASSIFICATION = json.load(fp)
+
 
 filter = Filter()
 sorter = Sorter()
@@ -61,14 +62,16 @@ def survey():
 
 @app.route('/recommend',methods=['GET','POST'])
 def recommend():
+    global data
     type = request.args.get('type')
     score = request.args.get('score')
     #fetch data according to type
     result = []
-    for code in CLASSIFICATION[str(score)]:
+    print(data.keys())
+    for code in CLASSIFICATION[int(score)][str(score)]:
         result.append(df2dic(code,data[code]))
     cols = [key for key in result[0].keys()]
-
+    print(len(result))
     return render_template('recommend.html', type=type, stocks=result, cols=cols)
 
 

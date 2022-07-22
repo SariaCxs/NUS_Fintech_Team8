@@ -14,11 +14,15 @@ def var(data):
     redata['Date'] = redata[['Date']].astype(str)
     redata['Rev' ]= redata.Close.diff(1)
     redata['Last_close' ]= redata.Close.shift(1)
-    redata['Rev_rate' ]= redata['Rev' ] /redata['Last_close']
+    redata['Rev_rate' ]= redata['Rev'] /redata['Last_close']
     redata = redata.dropna()
 
     sRate = redata["Rev_rate"].sort_values(ascending=True)
-    var1 = np.percentile(sRate, 5, method='midpoint' ) *4.69
+    try:
+        var1 = np.percentile(sRate, 5, interpolation='midpoint' ) *4.69
+    except IndexError:
+        print(sRate)
+
 
     u = redata.Rev_rate.mean()
     std  = redata.Rev_rate.std()
@@ -42,8 +46,8 @@ def gain(data2):
     redata2 = redata2.dropna()
 
     sRate2 = redata2["Rev_rate"].sort_values(ascending=True)
-    gain1 = np.percentile(sRate2, 95, method='midpoint') * 4.69
-    print(gain1)
+    gain1 = np.percentile(sRate2, 95, interpolation='midpoint') * 4.69
+
 
     u2 = redata2.Rev_rate.mean()
     std2 = redata2.Rev_rate.std()
@@ -56,26 +60,22 @@ def gain(data2):
 def longterm(longdata):
     #longdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
     # longdata = pd.read_csv(f'StockData/{stock}.csv')
-    longdata['ma120']=longdata['Adj Close'].rolling(120).mean()
-    longdata['ma60']=longdata['Adj Close'].rolling(60).mean()
-    if  longdata.ma120[-1]>longdata.ma60[-1] or longdata.ma60.rolling(5).mean()[-1]>longdata.ma60.rolling(2).mean()[-1]:
-        print(0)
+    longdata['ma120']=longdata['Close'].rolling(120).mean()
+    longdata['ma60']=longdata['Close'].rolling(60).mean()
+    if  longdata.ma120.values[-1]>longdata.ma60.values[-1] or longdata.ma60.rolling(5).mean().values[-1]>longdata.ma60.rolling(2).mean().values[-1]:
         return False
     else:
-        print(1)
         return True
 
  #筛选中线股票
 def midterm(middata):
     #middata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
 
-    middata['ma30']= middata['Adj Close'].rolling(30).mean()
-    middata['ma20'] = middata['Adj Close'].rolling(20).mean()
-    if middata.ma30[-1]>middata.ma20[-1] or middata.ma20.rolling(5).mean()[-1]>middata.ma20.rolling(2).mean()[-1]:
-        print(0)
+    middata['ma30']= middata['Close'].rolling(30).mean()
+    middata['ma20'] = middata['Close'].rolling(20).mean()
+    if middata.ma30.values[-1]>middata.ma20.values[-1] or middata.ma20.rolling(5).mean().values[-1]>middata.ma20.rolling(2).mean().values[-1]:
         return False
     else:
-        print(1)
         return True
 
 
@@ -84,8 +84,8 @@ def shortterm(shortdata):
     from pandas_datareader import data
     #shortdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
     # shortdata = pd.read_csv(f'StockData/{stock}.csv')
-    shortdata['ma10'] =  shortdata['Adj Close'].rolling(10).mean()
-    shortdata['ma5'] =   shortdata['Adj Close'].rolling(5).mean()
+    shortdata['ma10'] =  shortdata['Close'].rolling(10).mean()
+    shortdata['ma5'] =   shortdata['Close'].rolling(5).mean()
     shortdata['amplitude'] = (shortdata['High'] - shortdata['Low'])/shortdata['Close'].shift(1)
     shortdata['rev_rate'] = (shortdata.Close.diff(1))/shortdata['Close'].shift(1)
     count =0
@@ -93,19 +93,16 @@ def shortterm(shortdata):
     for amp in shortdata.amplitude[-15:-1]:
         if amp >0.04:
             count+=1
-    print(count)
     for amp in shortdata.rev_rate[-15:-1]:
         if amp >0.05:
             count2+=1
-    print(count2)
     if count > 5 or count2 > 3:
-        print(11)
         return True
-    if  shortdata.ma10[-1]< shortdata.ma5[-1] or  shortdata.ma5.rolling(5).mean()[-1]< shortdata.ma5.rolling(2).mean()[-1]:
-        print(12)
+
+    if  shortdata.ma10.values[-1]< shortdata.ma5.values[-1] or  shortdata.ma5.rolling(5).mean().values[-1]< shortdata.ma5.rolling(2).mean().values[-1]:
         return True
+
     else:
-        print(0)
         return False
 
 
@@ -125,50 +122,53 @@ def coarse_sizing(stocks):
     risk3short = []
 
 
-    for code in stocks:
+    for stock in stocks:
         try:
-            stock = pd.read_csv(f'StockData/{code}.csv')
-            myvar = var(stock)
+            data = pd.read_csv(f'StockData/{stock}.csv')
+            if len(data) < 365:
+                continue
+            myvar = var(data)
+            print(stock)
             if myvar > -0.1:
-                if longterm(stock):
+                if longterm(data):
                     risk0long.append(stock)
                     risk1long.append(stock)
                     risk2long.append(stock)
-                if midterm(stock):
+                if midterm(data):
                     risk0mid.append(stock)
                     risk1mid.append(stock)
                     risk2mid.append(stock)
-                if shortterm(stock):
+                if shortterm(data):
                     risk0short.append(stock)
                     risk1short.append(stock)
                     risk2short.append(stock)
             elif myvar > -0.15:
-                if longterm(stock):
+                if longterm(data):
                     risk1long.append(stock)
                     risk2long.append(stock)
-                if midterm(stock):
+                if midterm(data):
                     risk1mid.append(stock)
                     risk2mid.append(stock)
-                if shortterm(stock):
+                if shortterm(data):
                     risk1short.append(stock)
                     risk2short.append(stock)
             elif myvar > -0.2:
-                if longterm(stock):
+                if longterm(data):
                     risk2long.append(stock)
-                if midterm(stock):
+                if midterm(data):
                     risk2mid.append(stock)
-                if shortterm(stock):
+                if shortterm(data):
                     risk1short.append(stock)
 
-            mygain = gain(stock)
+            mygain = gain(data)
             if mygain > 0.1:
-                if longterm(stock):
+                if longterm(data):
                     risk3long.append(stock)
-                if midterm(stock):
+                if midterm(data):
                     risk3mid.append(stock)
-                if shortterm(stock):
+                if shortterm(data):
                     risk3short.append(stock)
-        except :
+        except FileNotFoundError :
             pass
 
     return [risk0long, risk0mid, risk0short, risk1long, risk1mid, risk1short,
@@ -185,7 +185,7 @@ json_content = []
 for i in range(len(result)):
     json_content.append({i:result[i]})
 
-print(json)
+print(json_content)
 
 json.dump(json_content, json_file, indent=4)
 # json.dump(save_json_content, json_file, ensure_ascii=False, indent=4) # 保存中文
