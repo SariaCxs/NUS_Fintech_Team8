@@ -125,7 +125,7 @@ def search_result():
     plt.legend()
     plt.title("The Search Result of " + stockcode)
     plt.xlabel("Date")
-    plt.ylabel("Dollar")
+    plt.ylabel("Currency in USD")
 
     # 将画出的图推给前端
     buffer = BytesIO()
