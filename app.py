@@ -1,4 +1,3 @@
-
 import tushare as ts
 from filter import Filter
 from sorter import Sorter
@@ -11,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import matplotlib as mpl
 
-import DataGeter
+import ploter
 from flask import (
     redirect, render_template, request, url_for
 )
@@ -20,6 +19,8 @@ from pandas_datareader import data
 import json
 from util.getInvestType import InvestSurvey
 app = Flask(__name__)
+#更新静态文件，否则echart无法加载
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 CODE_LIST = pd.read_csv("./data/Runes_clean.csv")['Rune']
 with open('./data/classification.json','r',encoding='utf8')as fp:
@@ -98,7 +99,7 @@ def search():
         enddate = request.form['enddate']
         col = request.form['col']
         # 接受用户参数传入
-        if startdate > enddate:
+        if startdate > enddate or stockcode =="":
             return render_template('404.html')
         return redirect(url_for('search_result', stockcode=stockcode, startdate=startdate, enddate=enddate, col=col))
     return render_template('search.html')
@@ -111,11 +112,14 @@ def search_result():
     startdate = request.args.get('startdate')
     enddate = request.args.get('enddate')
     col = request.args.get('col')
-
-    data = DataGeter.GetDemo(stockcode, startdate, enddate, col)
+    #动态可视化
+    if col == "":
+        ploter.kline(stockcode=stockcode,startdate=startdate,enddate=enddate)
+        return render_template('echart_result.html')
+    data = ploter.GetDemo(stockcode, startdate, enddate, col)
     col = col.split(" ")
 
-    # 画图函数
+    # 静态可视化
     plt.switch_backend('agg') 
     plt.clf() # 关掉上一次请求时的图片
     style.use('ggplot')
@@ -135,6 +139,11 @@ def search_result():
     ims = imb.decode()
     imd = "data:image/png;base64," + ims
     return render_template('get_result.html', img=imd)
+
+#echart获取
+@app.route('/echart', methods=('GET', 'POST'))
+def echart():
+    return render_template('echart.html')
 
 #联系我们
 @app.route('/contact', methods=('GET', 'POST'))
