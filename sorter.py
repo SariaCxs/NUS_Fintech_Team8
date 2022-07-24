@@ -15,7 +15,6 @@ class Sorter():
         :return: rankresult a sorted list of stock code, predict price and rise percent
         '''
         rank_result = []
-        print(data)
         for code in data.keys():
 
             pred, rise = self.predict(data[code],cols)

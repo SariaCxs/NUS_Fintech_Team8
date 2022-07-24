@@ -29,10 +29,11 @@ with open('./data/classification.json','r',encoding='utf8')as fp:
 
 filter = Filter()
 sorter = Sorter()
+filter = Filter()
 survey_helper = InvestSurvey()
 CODE_SIFT = []
 
-indicators = ['MA','WR']
+
 
 data = {}
 daily_data = []
@@ -63,11 +64,9 @@ def recommend():
     score = request.args.get('score')
     #fetch data according to type
     result = []
-    print(data.keys())
     for code in CLASSIFICATION[int(score)][str(score)]:
         result.append(df2dic(code,data[code]))
     cols = [key for key in result[0].keys()]
-    print(len(result))
     return render_template('recommend.html', type=type, stocks=result, cols=cols)
 
 
@@ -78,15 +77,18 @@ def select_stock():
     global data
     if request.method == 'POST':
         #根据args进行判断
-        global indicators
+        global filter
         filter_indicators = {}
-        for ind in indicators:
-            if request.form.get(ind) == 1:
+        for ind in filter.indicator_pool.keys():
+            if request.form.get(ind.upper()) == '1':
                 filter_indicators[ind] = request.form.get(ind.lower())
-        #result = filter.filt(data,filter_indicators)
-        result = sorter.sort(data,'Close')
-
-    cols = [key for key in result[0].keys()]
+        code = filter.filt(filter_indicators)
+        result = toFormat(code,data)
+        #result = sorter.sort(data,'Close')
+    if len(result)>0:
+        cols = [key for key in result[0].keys()]
+    else:
+        cols = []
 
     return render_template('select.html',stocks=result,cols=cols)
 
@@ -177,7 +179,7 @@ def fetch_data():
     global daily_data
     data = {}
     daily_data = []
-    for stock in CODE_LIST:
+    for stock in CODE_LIST[:]:
         try:
             STOCK_DATA = pd.read_csv("./data/StockData/" + stock + ".csv")
             STOCK_DATA = STOCK_DATA.iloc[-60:].round(2)
@@ -186,6 +188,19 @@ def fetch_data():
 
         except:
             pass
+    daily_data = toFormat(data.keys(),data)
+
+#取code中每支股票的第一行，转换成前端的输出格式
+def toFormat(code,df):
+    result = []
+    for stock in code:
+        dic = {}
+        dic['code'] = stock
+        data = df[stock]
+        for col in data:
+            dic[col] = data.iloc[-1, :][col]
+        result.append(dic)
+    return result
 
 
 
