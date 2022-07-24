@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} Stock Funnel- Search{% endblock %}
+
+{% block content %} 
+    <div class="row vh-100 bg-light rounded  justify-content-center mx-4">
+        <div class="col-md-12 pt-4 px-4"> 
+            <h3>Search for Indicators</h3>
+            <p>This is a more sophisticated version of Search Stocks, where you can visualize some indicators, such as moving averages or RSI, for the stocks you are interested in.</p>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="stockcode" class="form-label">Symbol</label>
+                    <input class="form-control" name="stockcode" id="stockcode" aria-describedby="CodeHelp" required>
+                    <div id="CodeHelp" class="form-text">The format like 'TSLA'.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="startdate" class="form-label">Start Date</label>
+                    <input class="form-control" name="startdate" id="startdate" aria-describedby="DateHelp">
+                    <div id="DateHelp" class="form-text">The format like '2020-11-10', If you do not select a time range, we will automatically display the last 2 months (doesn't include the days for 'warming up') of data for you.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="enddate" class="form-label" >End Date</label>
+                    <input class="form-control" name="enddate" id="enddate" aria-describedby="DateHelp">
+                    <div id="DateHelp" class="form-text">The requirement just like the "Start Date".</div>
+                </div>
+                <div class="mb-3">
+                    <label for="col" class="form-label" >Indicators</label>
+                    <input class="form-control" name="inds" id="inds" aria-describedby="colHelp">
+                    <div id="colHelp" class="form-text">You can query the following indicators here: EMA (you must add the number of days after the query for EMA, SMA and RSI in order for the system to give you the answer, in the format of EMA-14), SMA, RSI and MACD, if you want to query more than one indicator at the same time, please use spaces to separate them.</b></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        
+    </div>
+{% endblock %}

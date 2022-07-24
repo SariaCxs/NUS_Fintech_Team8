@@ -2,9 +2,9 @@
 ## 若要在服务器进行配置，仍需要独立下载以下库：
 - tushare
 - torch
-- matplotlib
 - flask
 - pyecharts
+- plotly
 ## 改动日志
 ### V1.3
 - 在推荐与筛选页面的股票表格中加入了点击股票代码查看近2个月数据的功能
@@ -21,3 +21,4 @@
 
 ### V1.6
 - 改由plotly代替matplotlib完成K线图以外的可视化
+- 加入指标搜索功能，可以查询某股票某时间段内的RSI、EMA、SMA和MACD指标，其中MACD指标的计算目前仍有问题，有待进一步修正
