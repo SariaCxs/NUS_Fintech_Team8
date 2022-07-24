@@ -116,31 +116,32 @@ def search_result():
     col = request.args.get('col')
     #动态可视化
     if col == "":
-        ploter.kline(stockcode=stockcode,startdate=startdate,enddate=enddate)
+        ploter.kline(stockcode,startdate,enddate)
         return render_template('echart_result.html')
-    data = ploter.GetDemo(stockcode, startdate, enddate, col)
-    col = col.split(" ")
+    jsfig = ploter.ochl(stockcode,startdate,enddate,col)
+    return render_template('plotly_result.html',jsfig = jsfig)
+    # data = ploter.GetDemo(stockcode, startdate, enddate, col)
+    # col = col.split(" ")
+    # # 静态可视化
+    # plt.switch_backend('agg') 
+    # plt.clf() # 关掉上一次请求时的图片
+    # style.use('ggplot')
+    # mpl.rc('figure', dpi=120)
+    # for each_col in col:
+    #     plt.plot(data[each_col], label=each_col)
+    # plt.legend()
+    # plt.title("The Search Result of " + stockcode)
+    # plt.xlabel("Date")
+    # plt.ylabel("Currency in USD")
 
-    # 静态可视化
-    plt.switch_backend('agg') 
-    plt.clf() # 关掉上一次请求时的图片
-    style.use('ggplot')
-    mpl.rc('figure', dpi=120)
-    for each_col in col:
-        plt.plot(data[each_col], label=each_col)
-    plt.legend()
-    plt.title("The Search Result of " + stockcode)
-    plt.xlabel("Date")
-    plt.ylabel("Currency in USD")
-
-    # 将画出的图推给前端
-    buffer = BytesIO()
-    plt.savefig(buffer)
-    plot_data = buffer.getvalue()
-    imb = base64.b64encode(plot_data)  # 对plot_data进行编码
-    ims = imb.decode()
-    imd = "data:image/png;base64," + ims
-    return render_template('get_result.html', img=imd)
+    # # 将画出的图推给前端
+    # buffer = BytesIO()
+    # plt.savefig(buffer)
+    # plot_data = buffer.getvalue()
+    # imb = base64.b64encode(plot_data)  # 对plot_data进行编码
+    # ims = imb.decode()
+    # imd = "data:image/png;base64," + ims
+    # return render_template('get_result.html', img=imd)
 
 #echart获取
 @app.route('/echart', methods=('GET', 'POST'))

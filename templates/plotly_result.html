@@ -6,7 +6,12 @@
         <div class="col-md-12 pt-4 px-4"> 
             <h3>Search Result</h3>
             <p>Here you can view the visualization results about the stock you choose.</p>
-            <img src="{{ img }}" class="img-fluid mx-auto d-block pt-2">
+            <div class='graph' id='mydiv'>
+            <script>
+                var result = '{{ jsfig | safe }}';
+                var obj = JSON.parse(result);
+                Plotly.newPlot('mydiv', obj);
+            </script></div>
         </div>
     </div>
 {% endblock %}
