@@ -53,8 +53,7 @@ def kline(stockcode,startdate,enddate):
     c.render('./templates/echart.html')
 
 def ochl(stockcode,startdate,enddate,col):
-    py.init_notebook_mode(connected=False)
-    data = init_data(stockcode,startdate,enddate)[0]
+    data,startdate,enddate = init_data(stockcode,startdate,enddate)
     col = col.split(" ")
     if "Volume" in col and len(col) > 1:
         fig = make_subplots(rows=2, cols=1,shared_xaxes = True,vertical_spacing=0.1,x_title = "Date",y_title = "Currency in USD")
@@ -77,8 +76,7 @@ def ochl(stockcode,startdate,enddate,col):
     return jsfig
 
 def plot_inds(stockcode,startdate,enddate,inds):
-    py.init_notebook_mode(connected=False)
-
+    startdate,enddate = init_data(stockcode,startdate,enddate)[1],init_data(stockcode,startdate,enddate)[2]
     if "RSI" in inds and len(inds.split(" ")) == 1:
         layout = go.Layout(yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
         fig = go.Figure(layout = layout)
@@ -110,20 +108,17 @@ def plot_inds(stockcode,startdate,enddate,inds):
 
 def MA(stockcode,startdate,enddate,ind,fig,flag = False):
     kind,days = ind.split("-")
-    if startdate == "" and enddate == "":
+    startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
+    if kind == "EMA":
+        startdate = startdate - pd.tseries.offsets.BDay(1)
+        startdate = str(startdate).split(" ")[0]
         data = init_data(stockcode,startdate,enddate)[0]
-    else:
-        startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
-        if kind == "EMA":
-            startdate = startdate - pd.tseries.offsets.BDay(1)
-            startdate = str(startdate).split(" ")[0]
-            data = init_data(stockcode,startdate,enddate)[0]
-            data[kind] = data['Close'].ewm(int(days)).mean().shift()
-        elif kind == 'SMA':
-            startdate = startdate - pd.tseries.offsets.BDay(int(days))
-            startdate = str(startdate).split(" ")[0]
-            data = init_data(stockcode,startdate,enddate)[0]
-            data[kind] = data['Close'].rolling(int(days)).mean().shift()
+        data[kind] = data['Close'].ewm(int(days)).mean().shift()
+    elif kind == 'SMA':
+        startdate = startdate - pd.tseries.offsets.BDay(int(days))
+        startdate = str(startdate).split(" ")[0]
+        data = init_data(stockcode,startdate,enddate)[0]
+        data[kind] = data['Close'].rolling(int(days)).mean().shift()
     data.dropna(inplace = True)
     if flag == True:
         fig.add_trace(go.Scatter(x=data["Date"], y=data[kind], mode='lines', name=kind + "-" + days),row=1,col=1)
@@ -144,13 +139,10 @@ def RSI_converter(df,days):
 
 def RSI(stockcode,startdate,enddate,ind,fig,flag = False):
     days = ind.split("-")[1]
-    if startdate == "" and enddate == "":
-        data = init_data(stockcode,startdate,enddate)[0]
-    else:
-        startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
-        startdate = startdate - pd.tseries.offsets.BDay(int(days))
-        startdate = str(startdate).split(" ")[0]
-        data = init_data(stockcode,startdate,enddate)[0]
+    startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
+    startdate = startdate - pd.tseries.offsets.BDay(int(days))
+    startdate = str(startdate).split(" ")[0]
+    data = init_data(stockcode,startdate,enddate)[0]
     data["rsi"] = RSI_converter(data,int(days))
     data.dropna(inplace = True)
     if flag == True:
