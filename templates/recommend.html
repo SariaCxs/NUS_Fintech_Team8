@@ -11,18 +11,24 @@
             <br>And according to your type, we recommend the following stock for you. Stocks are ranked ascend in Rise.
         </p>
         <form method="post">
-            <h5>Time Period</h5>
-            <select name="sel" class="form-select mb-3" aria-label="Default select example">
-                <option value="1">One week</option>
-                <option value="2">One month</option>
-                <option value="3">Six months</option>
-            </select>
-            <h5>Rank ascend by</h5>
-            <select name='sort' class="form-select mb-3" aria-label="Default select example">
-                <option value=""></option>
-                <option value="rise">rise</option>
-                <option value="return">return</option>
-            </select>
+               <div>
+            <input class="form-check-input" type="checkbox" value="1" name="SECTOR" id="sector">
+                                <label class="form-check-label" for="sector">
+                                    sector
+                                </label>
+                <select name="sector" class="form-select mb-2 mt-2">
+                    <option value="Energy">Energy</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Industrials">Industrials</option>
+                    <option value="Basic Materials">Basic Materials</option>
+                    <option value="Communication Services">Communication Services</option>
+                    <option value="Consumer Cyclical">Consumer Cyclical</option>
+                    <option value="Consumer Defensive">Consumer Defensive</option>
+
+                </select>
+        </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         <hr>

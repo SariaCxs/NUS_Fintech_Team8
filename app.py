@@ -3,12 +3,6 @@ from filter import Filter
 from sorter import Sorter
 
 from flask import Flask
-import base64
-from io import BytesIO
-
-import matplotlib.pyplot as plt
-from matplotlib import style
-import matplotlib as mpl
 
 import ploter
 from flask import (
@@ -60,13 +54,23 @@ def survey():
 @app.route('/recommend',methods=['GET','POST'])
 def recommend():
     global data
+    global filter
     type = request.args.get('type')
     score = request.args.get('score')
+
     #fetch data according to type
-    result = []
-    for code in CLASSIFICATION[int(score)][str(score)]:
-        result.append(df2dic(code,data[code]))
-    cols = [key for key in result[0].keys()]
+    code = CLASSIFICATION[int(score)][str(score)]
+    result = toFormat(code, data)
+    if request.method == 'POST':
+        if request.form.get('SECTOR') == '1':
+            sector = request.form.get('sector')
+            sec_code = filter.filt({}, sector)
+            code = sorted(list(set(code).intersection(set(sec_code))))
+            result = toFormat(code, data)
+    if len(result)>0:
+        cols = [key for key in result[0].keys()]
+    else:
+        cols = []
     return render_template('recommend.html', type=type, stocks=result, cols=cols)
 
 
@@ -119,36 +123,38 @@ def search_result():
     col = request.args.get('col')
     #动态可视化
     if col == "":
-        ploter.kline(stockcode=stockcode,startdate=startdate,enddate=enddate)
+        ploter.kline(stockcode,startdate,enddate)
         return render_template('echart_result.html')
-    data = ploter.GetDemo(stockcode, startdate, enddate, col)
-    col = col.split(" ")
-
-    # 静态可视化
-    plt.switch_backend('agg') 
-    plt.clf() # 关掉上一次请求时的图片
-    style.use('ggplot')
-    mpl.rc('figure', dpi=120)
-    for each_col in col:
-        plt.plot(data[each_col], label=each_col)
-    plt.legend()
-    plt.title("The Search Result of " + stockcode)
-    plt.xlabel("Date")
-    plt.ylabel("Currency in USD")
-
-    # 将画出的图推给前端
-    buffer = BytesIO()
-    plt.savefig(buffer)
-    plot_data = buffer.getvalue()
-    imb = base64.b64encode(plot_data)  # 对plot_data进行编码
-    ims = imb.decode()
-    imd = "data:image/png;base64," + ims
-    return render_template('get_result.html', img=imd)
+    jsfig = ploter.ochl(stockcode,startdate,enddate,col)
+    return render_template('plotly_result.html',jsfig = jsfig)
 
 #echart获取
 @app.route('/echart', methods=('GET', 'POST'))
 def echart():
     return render_template('echart.html')
+
+@app.route('/search_indicator', methods=('GET', 'POST'))
+def search_indicator():
+    if request.method == 'POST':
+        stockcode = request.form['stockcode']
+        startdate = request.form['startdate']
+        enddate = request.form['enddate']
+        inds = request.form['inds']
+        # 接受用户参数传入
+        if startdate > enddate or stockcode =="":
+            return render_template('404.html')
+        return redirect(url_for('indicator_result', stockcode=stockcode, startdate=startdate, enddate=enddate, inds=inds))
+    return render_template('search_indicator.html')
+
+@app.route('/indicator_result', methods=('GET', 'POST'))
+def indicator_result():
+    stockcode = request.args.get('stockcode')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
+    inds = request.args.get('inds')
+    #动态可视化
+    jsfig = ploter.plot_inds(stockcode,startdate,enddate,inds= inds)
+    return render_template('plotly_result.html',jsfig = jsfig)
 
 #联系我们
 @app.route('/contact', methods=('GET', 'POST'))
@@ -204,8 +210,6 @@ def toFormat(code,df):
             dic[col] = data.iloc[-1, :][col]
         result.append(dic)
     return result
-
-
 
 if __name__ == "__main__":
     app.run(port=5000)
