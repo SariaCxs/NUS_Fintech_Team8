@@ -79,10 +79,13 @@ def select_stock():
         #根据args进行判断
         global filter
         filter_indicators = {}
+        sector = None
+        if request.form.get('SECTOR') == '1':
+            sector = request.form.get('sector')
         for ind in filter.indicator_pool.keys():
             if request.form.get(ind.upper()) == '1':
                 filter_indicators[ind] = request.form.get(ind.lower())
-        code = filter.filt(filter_indicators)
+        code = filter.filt(filter_indicators,sector)
         result = toFormat(code,data)
         #result = sorter.sort(data,'Close')
     if len(result)>0:
