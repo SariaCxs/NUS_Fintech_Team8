@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="row bg-light rounded  justify-content-center mx-4">
+<div class="row bg-light rounded  justify-content-center mx-0">
     <div class="col-md-12 pt-4 px-4"> 
         <h3>Your Customized Stock Funnel</h3>
         <p>From the previous questionnaire, we obtained your investment type as <mark>{{type}}</mark>.
@@ -45,7 +45,10 @@
         <tbody>
             {% for stock in stocks %}
             <tr>
-                <th scope="row"><a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a></th>
+                <th scope="row">
+                <!-- <a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a> -->
+                <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a>
+            </th>
                 {% for col in cols[1:] %}
                     <th>{{stock[col]}}</th>
                 {% endfor %}
