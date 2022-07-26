@@ -1,6 +1,6 @@
 import tushare as ts
 from filter import Filter
-from sorter import Sorter
+from sorter import KMeansSorter
 
 from flask import Flask
 
@@ -21,13 +21,11 @@ with open('./data/classification.json','r',encoding='utf8')as fp:
     CLASSIFICATION = json.load(fp)
 
 
-filter = Filter()
-sorter = Sorter()
+
+sorter = KMeansSorter()
 filter = Filter()
 survey_helper = InvestSurvey()
 CODE_SIFT = []
-
-
 
 data = {}
 daily_data = []
@@ -90,8 +88,8 @@ def select_stock():
             if request.form.get(ind.upper()) == '1':
                 filter_indicators[ind] = request.form.get(ind.lower())
         code = filter.filt(filter_indicators,sector)
-        result = toFormat(code,data)
-        #result = sorter.sort(data,'Close')
+        code = sorter.sort(code)
+        result = toFormat(code, data)
     if len(result)>0:
         cols = [key for key in result[0].keys()]
     else:

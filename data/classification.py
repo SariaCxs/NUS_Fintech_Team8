@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
+import datetime
+from dateutil.relativedelta import relativedelta
+
 
 # 计算个股月风险价值:历史模拟法和方差-协方差法的平均值
 def var(data):
@@ -175,17 +178,78 @@ def coarse_sizing(stocks):
           risk2long, risk2mid, risk2short, risk3long, risk3mid, risk3short]
 
 
-#对股票进行分类
-import json
-STOCK_LIST = pd.read_csv('Runes_clean.csv')['Rune']
-json_file_path = 'classification.json'
-json_file = open(json_file_path, mode='w')
-result = coarse_sizing(STOCK_LIST)
-json_content = []
-for i in range(len(result)):
-    json_content.append({i:result[i]})
 
-print(json_content)
 
-json.dump(json_content, json_file, indent=4)
-# json.dump(save_json_content, json_file, ensure_ascii=False, indent=4) # 保存中文
+
+def cal_alphabeta(history, cycle):
+    end_time = datetime.datetime.now().strftime('%Y-%m-%d')
+    if cycle == 'week':
+        start_time = (datetime.datetime.now() + relativedelta(weeks=-1)).strftime('%Y-%m-%d')
+    if cycle == 'month':
+        start_time = (datetime.datetime.now() + relativedelta(months=-1)).strftime('%Y-%m-%d')
+    if cycle == 'year':
+        start_time = (datetime.datetime.now() + relativedelta(years=-1)).strftime('%Y-%m-%d')
+    # history = data.DataReader(stock,start=start_time ,end= end_time ,data_source='yahoo')
+    # print(history.head())
+
+    # spy =  data.DataReader('SPY',start=start_time ,end= end_time ,data_source='yahoo')
+    spy = pd.read_csv("StockData/SPY.csv")
+    benchmark = spy.Close.pct_change().dropna()
+    # print(benchmark.head())
+
+    returns = history.Close.pct_change().dropna()
+    # print(returns)
+    bla = np.vstack([benchmark, np.ones(len(returns))]).T
+
+    result = np.linalg.lstsq(bla, returns)
+
+    beta = result[0][0]
+    alpha = result[0][1]
+
+    return alpha, beta
+
+
+def short_line_parameters(history):
+    end_time = datetime.datetime.now().strftime('%Y-%m-%d')
+    start_time = (datetime.datetime.now() + relativedelta(weeks=-1)).strftime('%Y-%m-%d')
+    # history = data.DataReader(stock,start=start_time ,end= end_time ,data_source='yahoo')
+    spy = pd.read_csv("StockData/SPY.csv")
+    benchmark = spy.Close.pct_change().dropna()
+    returns = history.Close.pct_change().dropna()
+
+    returns_above_mean = np.mean(returns - benchmark)
+    returns_above_var = np.var(returns - benchmark)
+    # print(str(stock)+'returns_above_mean:'+str(returns_above_mean))
+    # print(str(stock)+'returns_above_var:'+str(returns_above_var))
+
+    return returns_above_mean, returns_above_var
+
+if __name__ == '__main__':
+    # 对股票进行分类
+    import json
+
+    STOCK_LIST = pd.read_csv('Runes_clean.csv')['Rune']
+    json_file_path = 'classification.json'
+    json_file = open(json_file_path, mode='w')
+    result = coarse_sizing(STOCK_LIST)
+    json_content = []
+    for i in range(len(result)):
+        json_content.append({i: result[i]})
+
+    print(json_content)
+
+    json.dump(json_content, json_file, indent=4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
