@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
 import pandas as pd
-from data.classification import var
-import datetime
+
 
 
 
