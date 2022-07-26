@@ -8,7 +8,7 @@ import time
 from lstm import LSTM_Regression
 
 
-DAYS_FOR_TRAIN = 10
+DAYS_FOR_TRAIN = 60
 
 def create_dataset(data_close,days_for_train=5):
     x = []

@@ -28,6 +28,7 @@ survey_helper = InvestSurvey()
 CODE_SIFT = []
 
 data = {}
+code = []
 daily_data = []
 survey_args = ['goal','loss','hold']
 is_fetch = 0
@@ -77,6 +78,7 @@ def select_stock():
     #get 显示当日数据 列表存储
     result = daily_data
     global data
+    global code
     if request.method == 'POST':
         #根据args进行判断
         global filter
@@ -88,15 +90,40 @@ def select_stock():
             if request.form.get(ind.upper()) == '1':
                 filter_indicators[ind] = request.form.get(ind.lower())
         code = filter.filt(filter_indicators,sector)
-        code = sorter.sort(code)
         result = toFormat(code, data)
+    if len(result)>0:
+        cols = [key for key in result[0].keys()]
+        del cols[1]
+    else:
+        cols = []
+    print(daily_data)
+    return render_template('select.html',stocks=result,cols=cols,date=daily_data[0]['Date'])
+
+@app.route('/rank', methods=['GET'])
+def rank():
+    global code
+    global data
+    if len(code) > 0:
+        code = sorter.sort(code)
+    result = toRankFormat(code,data)
     if len(result)>0:
         cols = [key for key in result[0].keys()]
     else:
         cols = []
+    return render_template('rank_result.html', stocks=result, cols=cols,date=daily_data[0]['Date'])
 
-    return render_template('select.html',stocks=result,cols=cols)
 
+def toRankFormat(code,df):
+    result = []
+    for stock in code:
+        dic = {}
+        dic['code'] = stock
+        data = df[stock]['Close'].values
+        dic['Close'] = data[-1]
+        dic['Change'] = round(((data[-1] - data[-2]) / data[-2] * 100),2)
+        dic['TotalYield'] = round(((data[-1] - data[0]) / data[0] * 100),2)
+        result.append(dic)
+    return result
 
 @app.route('/search', methods=('GET', 'POST'))
 def search():
@@ -173,12 +200,12 @@ def parse_user_type(answers):
 
 
 
-def df2dic(code,df):
-    dic = {}
-    dic['code'] = code
-    for col in df:
-        dic[col] = df.iloc[-1,:][col]
-    return dic
+# def df2dic(code,df):
+#     dic = {}
+#     dic['code'] = code
+#     for col in df:
+#         dic[col] = df.iloc[-1,:][col]
+#     return dic
 
 
 def fetch_data():
@@ -187,15 +214,16 @@ def fetch_data():
     data = {}
     daily_data = []
     for stock in CODE_LIST[:]:
-        try:
+
             STOCK_DATA = pd.read_csv("./data/StockData/" + stock + ".csv")
             STOCK_DATA = STOCK_DATA.iloc[-60:].round(2)
+            del STOCK_DATA['Dividends']
+            del STOCK_DATA['Stock Splits']
             data[stock] = STOCK_DATA
-            daily_data.append(df2dic(stock,STOCK_DATA))
 
-        except:
-            pass
+
     daily_data = toFormat(data.keys(),data)
+    print(daily_data)
 
 #取code中每支股票的第一行，转换成前端的输出格式
 def toFormat(code,df):

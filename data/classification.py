@@ -21,24 +21,32 @@ def var(data):
     redata = redata.dropna()
 
     sRate = redata["Rev_rate"].sort_values(ascending=True)
-    try:
-        var1 = np.percentile(sRate, 5, interpolation='midpoint' ) *4.69
-    except IndexError:
-        print(sRate)
+
+    var1 = np.percentile(sRate, 5, interpolation='midpoint' ) *4.69
 
 
-    u = redata.Rev_rate.mean()
-    std  = redata.Rev_rate.std()
+
+    u = redata.Rev_rate.values.mean()
+    std  = redata.Rev_rate.values.std()
     var2 = (-norm.ppf(0.95 ) * std - u ) *4.69
 
     return (var1 +var2 ) /2
 
 
 # 为风险承受力高的用户筛选极端收益可能更高的股票
-def gain(data2):
+def gainandbeta(data, ben):
+
     # 计算极端收益
-    #data2 = data.DataReader(stock, start='2016', end='2020', data_source='yahoo')
-    # data2 = pd.read_csv(f'StockData/{stock}.csv')
+    data2 = data
+    spy = ben
+
+    benchmark = spy.Close[-64:-5].pct_change().dropna()
+    returns = data2.Close[-60:-1].pct_change().dropna()
+
+    bla = np.vstack([benchmark, np.ones(len(returns))]).T
+    result = np.linalg.lstsq(bla, returns,rcond=None)
+    beta = result[0][0]
+
     redata2 = data2['Close'].sort_index(ascending=True)
     redata2 = pd.DataFrame(redata2)
     redata2['Date'] = redata2.index
@@ -48,24 +56,27 @@ def gain(data2):
     redata2['Rev_rate'] = redata2['Rev'] / redata2['Last_close']
     redata2 = redata2.dropna()
 
+    # print(redata2.head(10))
+
     sRate2 = redata2["Rev_rate"].sort_values(ascending=True)
     gain1 = np.percentile(sRate2, 95, interpolation='midpoint') * 4.69
+    # print(gain1)
 
-
-    u2 = redata2.Rev_rate.mean()
-    std2 = redata2.Rev_rate.std()
-    gain2 = (norm.ppf(0.95) * std2 - u2) * 4.69
-
-    return (gain1 + gain2) / 2
+    u2 = redata2.Rev_rate.values.mean()
+    σ2 = redata2.Rev_rate.values.std()
+    gain2 = (norm.ppf(0.95) * σ2 - u2) * 4.69
+    # print(gain2)
+    return beta, ((gain1 + gain2) / 2)
 
 
 #筛选长线股票
 def longterm(longdata):
     #longdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
     # longdata = pd.read_csv(f'StockData/{stock}.csv')
-    longdata['ma120']=longdata['Close'].rolling(120).mean()
+    longdata['ma90']=longdata['Close'].rolling(90).mean()
     longdata['ma60']=longdata['Close'].rolling(60).mean()
-    if  longdata.ma120.values[-1]>longdata.ma60.values[-1] or longdata.ma60.rolling(5).mean().values[-1]>longdata.ma60.rolling(2).mean().values[-1]:
+    if longdata.ma90.values[-1] > longdata.ma60.values[-1] or longdata.ma60.rolling(20).mean().values[-1] > longdata.ma60.values[-1] or \
+            longdata.Close.values[-1] < longdata.ma60.values[-1]:
         return False
     else:
         return True
@@ -74,37 +85,46 @@ def longterm(longdata):
 def midterm(middata):
     #middata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
 
-    middata['ma30']= middata['Close'].rolling(30).mean()
-    middata['ma20'] = middata['Close'].rolling(20).mean()
-    if middata.ma30.values[-1]>middata.ma20.values[-1] or middata.ma20.rolling(5).mean().values[-1]>middata.ma20.rolling(2).mean().values[-1]:
+    middata['ma60']= middata['Close'].rolling(60).mean()
+    middata['ma30'] = middata['Close'].rolling(30).mean()
+    if middata.ma60.values[-1]>middata.ma30.values[-1] or middata.ma30.rolling(10).mean().values[-1]>middata.ma30.values[-1] or middata.Close.values[-1] <middata.ma30.values[-1]:
         return False
     else:
         return True
 
+    # 筛选短线股票
 
-  #筛选短线股票
-def shortterm(shortdata):
-    from pandas_datareader import data
-    #shortdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
-    # shortdata = pd.read_csv(f'StockData/{stock}.csv')
-    shortdata['ma10'] =  shortdata['Close'].rolling(10).mean()
-    shortdata['ma5'] =   shortdata['Close'].rolling(5).mean()
-    shortdata['amplitude'] = (shortdata['High'] - shortdata['Low'])/shortdata['Close'].shift(1)
-    shortdata['rev_rate'] = (shortdata.Close.diff(1))/shortdata['Close'].shift(1)
-    count =0
+
+def shortterm(data, ben):
+    shortdata = data
+    spy = ben
+    
+    benchmark = spy.Close.pct_change()[-11:-5]
+    returns = shortdata.Close.pct_change()[-7:-1]
+    returns_above_mean = np.mean(returns - benchmark)
+
+    if (returns_above_mean < 0):
+        return False
+
+    shortdata['ma10'] = shortdata['Close'].rolling(10).mean()
+    shortdata['ma5'] = shortdata['Close'].rolling(5).mean()
+    shortdata['amplitude'] = (shortdata['High'] - shortdata['Low']) / shortdata['Close'].shift(1)
+    shortdata['rev_rate'] = (shortdata.Close.diff(1)) / shortdata['Close'].shift(1)
+
+    count = 0
     count2 = 0
+
     for amp in shortdata.amplitude[-15:-1]:
-        if amp >0.04:
-            count+=1
-    for amp in shortdata.rev_rate[-15:-1]:
-        if amp >0.05:
-            count2+=1
+        if amp > 0.04:
+            count += 1
+    for amp in shortdata.rev_rate.values[-15:-1]:
+        if amp > 0.05:
+            count2 += 1
     if count > 5 or count2 > 3:
         return True
-
-    if  shortdata.ma10.values[-1]< shortdata.ma5.values[-1] or  shortdata.ma5.rolling(5).mean().values[-1]< shortdata.ma5.rolling(2).mean().values[-1]:
+    if shortdata.ma10.values[-1] < shortdata.ma5.values[-1] and shortdata.ma5.rolling(5).mean().values[-1] < shortdata.ma5.rolling(2).mean().values[
+        -1]:
         return True
-
     else:
         return False
 
@@ -124,55 +144,52 @@ def coarse_sizing(stocks):
     risk3mid = []
     risk3short = []
 
-
+    ben = pd.read_csv('./StockData/SPY.csv')
     for stock in stocks:
-        try:
-            data = pd.read_csv(f'StockData/{stock}.csv')
-            if len(data) < 365:
-                continue
-            myvar = var(data)
-            print(stock)
-            if myvar > -0.1:
-                if longterm(data):
-                    risk0long.append(stock)
-                    risk1long.append(stock)
-                    risk2long.append(stock)
-                if midterm(data):
-                    risk0mid.append(stock)
-                    risk1mid.append(stock)
-                    risk2mid.append(stock)
-                if shortterm(data):
-                    risk0short.append(stock)
-                    risk1short.append(stock)
-                    risk2short.append(stock)
-            elif myvar > -0.15:
-                if longterm(data):
-                    risk1long.append(stock)
-                    risk2long.append(stock)
-                if midterm(data):
-                    risk1mid.append(stock)
-                    risk2mid.append(stock)
-                if shortterm(data):
-                    risk1short.append(stock)
-                    risk2short.append(stock)
-            elif myvar > -0.2:
-                if longterm(data):
-                    risk2long.append(stock)
-                if midterm(data):
-                    risk2mid.append(stock)
-                if shortterm(data):
-                    risk1short.append(stock)
+        print(stock)
+        data = pd.read_csv(f'./StockData/{stock}.csv')
+        myvar = var(data)
+        if myvar > -0.125:
+            if longterm(data):
+                risk0long.append(stock)
+                risk1long.append(stock)
+                risk2long.append(stock)
+            if midterm(data):
+                risk0mid.append(stock)
+                risk1mid.append(stock)
+                risk2mid.append(stock)
+            if shortterm(data, ben):
+                risk0short.append(stock)
+                risk1short.append(stock)
+                risk2short.append(stock)
+        elif myvar > -0.15:
+            if longterm(data):
+                risk1long.append(stock)
+                risk2long.append(stock)
+            if midterm(data):
+                risk1mid.append(stock)
+                risk2mid.append(stock)
+            if shortterm(data, ben):
+                risk1short.append(stock)
+                risk2short.append(stock)
+        elif myvar > -0.2:
+            if longterm(data):
+                risk2long.append(stock)
+            if midterm(data):
+                risk2mid.append(stock)
+            if shortterm(data, ben):
+                risk1short.append(stock)
 
-            mygain = gain(data)
-            if mygain > 0.1:
-                if longterm(data):
-                    risk3long.append(stock)
-                if midterm(data):
-                    risk3mid.append(stock)
-                if shortterm(data):
-                    risk3short.append(stock)
-        except FileNotFoundError :
-            pass
+        beta, mygain = gainandbeta(data, ben)
+        if beta < 1.1:
+            continue
+        if mygain > 0.15:
+            if longterm(data):
+                risk3long.append(stock)
+            if midterm(data):
+                risk3mid.append(stock)
+            if shortterm(data, ben):
+                risk3short.append(stock)
 
     return [risk0long, risk0mid, risk0short, risk1long, risk1mid, risk1short,
           risk2long, risk2mid, risk2short, risk3long, risk3mid, risk3short]
@@ -180,33 +197,6 @@ def coarse_sizing(stocks):
 
 
 
-
-def cal_alphabeta(history, cycle):
-    end_time = datetime.datetime.now().strftime('%Y-%m-%d')
-    if cycle == 'week':
-        start_time = (datetime.datetime.now() + relativedelta(weeks=-1)).strftime('%Y-%m-%d')
-    if cycle == 'month':
-        start_time = (datetime.datetime.now() + relativedelta(months=-1)).strftime('%Y-%m-%d')
-    if cycle == 'year':
-        start_time = (datetime.datetime.now() + relativedelta(years=-1)).strftime('%Y-%m-%d')
-    # history = data.DataReader(stock,start=start_time ,end= end_time ,data_source='yahoo')
-    # print(history.head())
-
-    # spy =  data.DataReader('SPY',start=start_time ,end= end_time ,data_source='yahoo')
-    spy = pd.read_csv("StockData/SPY.csv")
-    benchmark = spy.Close.pct_change().dropna()
-    # print(benchmark.head())
-
-    returns = history.Close.pct_change().dropna()
-    # print(returns)
-    bla = np.vstack([benchmark, np.ones(len(returns))]).T
-
-    result = np.linalg.lstsq(bla, returns)
-
-    beta = result[0][0]
-    alpha = result[0][1]
-
-    return alpha, beta
 
 
 def short_line_parameters(history):

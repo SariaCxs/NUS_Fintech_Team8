@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %} Stock Funnel- Select{% endblock %}
+{% block content %}
+<div class="row bg-light rounded align-items-center justify-content-center mx-0">
+    <div class="col-md-12 pt-4 px-4">
+
+
+    <h3>Stock Ranker for you to better select stock</h3>
+        <p>Introduction of our ranker</p>
+        <p>You can click on the ticker symbol in the table to see a visualization of its high and low prices for the last 2 months.</p>
+    <h6>Update on: {{date}}</h6>
+    <br>
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                {% for col in cols %}
+
+                        <th scope="col">{{col}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <th scope="row"> <a href="{{ url_for('search_result', stockcode=stock['code'],startdate='',enddate='',col='') }}">{{stock.code}}</a></th>
+                <th>{{stock['Close']}}</th>
+                <th>{{stock['Change']}}</th>
+                <th>{{stock['TotalYield']}}</th>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+</div>
+
+{% endblock %}
