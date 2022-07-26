@@ -1,60 +1,54 @@
-import tushare as ts
-import torch
-from model.lstm import LSTM_Regression
 import numpy as np
 from sklearn.cluster import KMeans
 import pandas as pd
 from data.classification import var
-
-class LSTMSorter():
-    def __init__(self):
-        self.model = self.load_model()
+import datetime
 
 
-    def sort(self,data, cols):
-        '''
-        :param data: dic include stock code and dataframe
-        :param cols: column needed to predict the result
-        :return: rankresult a sorted list of stock code, predict price and rise percent
-        '''
-        rank_result = []
-        for code in data.keys():
 
-            pred, rise = self.predict(data[code],cols)
-            rank_result.append({'code': code, 'pred': pred, 'rise': rise})
-        rank_result = sorted(rank_result, key=lambda r: r['rise'], reverse=True)
-        return rank_result
-
-    def predict(self,data,cols):
-        data = data[cols].values
-        data = data.astype('float32')
-        # 归一化
-        max_value = np.max(data)
-        min_value = np.min(data)
-        
-        min_max_data = (data - min_value) / (max_value - min_value)
-
-        x_data = torch.from_numpy(min_max_data.reshape(-1, 1, 60))
-        pred = self.model(x_data).reshape(-1)[0]
-        #反归一化并输出预测值
-        pred = pred * (max_value - min_value) + min_value
-        rise = 100 * (pred - data[-1]) / data[-1]
-
-        return np.round(pred.detach().numpy(), 2), np.round(rise.detach().numpy(), 2)
-
-
-    def load_model(self):
-        state_dict = torch.load('./model/lstm.pth')
-        model = LSTM_Regression(60, 8, output_size=1, num_layers=2)
-        model.load_state_dict(state_dict)
-        model = model.eval()
-        return model
-
-def Cal_min_dest(INPUT_POINT, INDEX_POINTS):
-    dst_out = 100
+def Cal_min_dest(INPUT_POINT,INDEX_POINTS):
+    dst_out=100000
+    n=0
     for cal_Index in INDEX_POINTS:
-        dst_out = min(np.linalg.norm(INPUT_POINT - cal_Index), dst_out)
-    return dst_out
+        DST=np.linalg.norm(INPUT_POINT-cal_Index)
+        if DST<dst_out:
+            Idx_out=n
+            dst_out=DST
+        n+=1
+    return dst_out,int(Idx_out)
+
+
+def cal_alphabeta(history, cycle, spy):
+
+    benchmark = spy.Close.pct_change().dropna()
+    LEN_CAL = min(len(history), len(benchmark))
+    # print(LEN_CAL)
+    benchmark = benchmark[-LEN_CAL:]
+    returns = history[-LEN_CAL:]
+
+    bla = np.vstack([benchmark, np.ones(len(returns))]).T
+
+    result = np.linalg.lstsq(bla, returns, rcond=-1)
+
+    beta = result[0][0]
+    alpha = result[0][1]
+
+    return alpha, beta
+
+
+def short_line_parameters(history, spy):
+
+    benchmark = spy.Close.pct_change().dropna()
+    LEN_CAL = min(len(history), len(benchmark))
+    benchmark = benchmark[-LEN_CAL:]
+    returns = history[-LEN_CAL:]  # .Close.pct_change().dropna()
+
+    returns_above_mean = np.mean(returns - benchmark)
+    returns_above_var = np.var(returns - benchmark)
+
+
+    return returns_above_mean, returns_above_var
+
 
 class KMeansSorter():
     def __init__(self):
@@ -63,21 +57,63 @@ class KMeansSorter():
     def sort(self,code_list):
         Data_mat = np.empty(shape=[0, 2])
         Dst_mat = np.empty(shape=[0, 1])
+        Sym_mat = np.empty(shape=[0, 1])
+        spy = pd.read_csv('./data/StockData/SPY.csv')
 
         for stock in code_list:
-            STOCK_DATA = pd.read_csv("./data/StockData/" + stock + ".csv")
-            AVR_EARN = (STOCK_DATA['Close'][len(STOCK_DATA) - 1] - STOCK_DATA['Close'][0]) / STOCK_DATA['Close'][0]
-            Data_mat = np.append(Data_mat, [[var(STOCK_DATA), AVR_EARN]], axis=0)
+            STOCK_DATA = pd.read_csv("./data/StockData/" + stock + ".csv")['Close']
+            #AVR_EARN = (STOCK_DATA['Close'][len(STOCK_DATA) - 1] - STOCK_DATA['Close'][0]) / STOCK_DATA['Close'][0]
+            alpha, beta = cal_alphabeta(STOCK_DATA, "month",spy)
+            returns_above_mean, returns_above_var = short_line_parameters(STOCK_DATA,spy)
+            Data_mat = np.append(Data_mat, [[alpha, beta]], axis=0)
             Dst_mat = np.append(Dst_mat, [0])
+            Sym_mat = np.append(Sym_mat, stock)
+        print(Data_mat.shape)
+        COUNTDEL = 0
 
 
-        kmeans = KMeans(n_clusters=4, random_state=0).fit(Data_mat)
 
-        #y_predict = kmeans.predict(Data_mat)
+        KmeansTypeAmount = 10
+        Core_mat = np.empty(shape=[0, 1])
+        Core_count = np.zeros(KmeansTypeAmount)
 
-        for n in range(Dst_mat.shape[0]):
-            Dst_mat[n] = Cal_min_dest(Data_mat[n], kmeans.cluster_centers_)
-        DICT_DATA = dict(zip(code_list, Dst_mat))
+        for DATA in Data_mat:
+            if np.isnan(DATA).any():
+                # print(DATA,COUNTDEL)
+                Data_mat = np.delete(Data_mat, COUNTDEL, axis=0)
+                Dst_mat = np.delete(Dst_mat, COUNTDEL, axis=0)
+                Sym_mat = np.delete(Sym_mat, COUNTDEL, axis=0)
+            else:
+                COUNTDEL += 1
+
+        print(Data_mat.shape)
+
+        kmeans = KMeans(n_clusters=KmeansTypeAmount, random_state=0).fit(Data_mat)
+
+        for n in range(COUNTDEL):
+            Dst_mat[n], CORE_NEAREST = Cal_min_dest(Data_mat[n], kmeans.cluster_centers_)
+            Core_mat = np.append(Core_mat, CORE_NEAREST)
+            Core_count[CORE_NEAREST] += 1
+
+        CORE_USE = 0
+        MAX_ALPHA = 0
+        for n in range(KmeansTypeAmount):
+            if (Core_count[n] > COUNTDEL / (2 * KmeansTypeAmount) and MAX_ALPHA < kmeans.cluster_centers_[n][0]):
+                CORE_USE = n
+                MAX_ALPHA = kmeans.cluster_centers_[n][0]
+
+        print(CORE_USE)
+        COUNTDEL = 0
+        for DATA in Dst_mat:
+            if Core_mat[COUNTDEL] != CORE_USE:
+                # print(DATA,COUNTDEL)
+                Dst_mat = np.delete(Dst_mat, COUNTDEL, axis=0)
+                Sym_mat = np.delete(Sym_mat, COUNTDEL, axis=0)
+                Core_mat = np.delete(Core_mat, COUNTDEL, axis=0)
+            else:
+                COUNTDEL += 1
+
+        DICT_DATA = dict(zip(Sym_mat, Dst_mat))
         return  self.sort_by_value(DICT_DATA)
 
 
