@@ -1,17 +1,18 @@
 {% extends 'base.html' %}
-{% block title %} Stock Funnel- Search Result{% endblock %}
-{% block content %} 
+{% block title %} Stock Funnel- Visualization{% endblock %}
+{% block content %}
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <div class="row vh-100 bg-light rounded  justify-content-center mx-4">
-        <div class="col-md-12 pt-4 px-4"> 
-            <h3>Search Result</h3>
-            <p>Here you can view the visualization results about the stock you choose.</p>
-            <div class='graph' id='mydiv'>
+<div class="row vh-100 bg-light rounded  justify-content-center mx-0">
+    <div class="col-md-12 pt-4 px-4">
+        <h3>{{ symbol }}</h3>
+        <p>{{ fullname }}</p>
+        <div class='graph' id='mydiv'>
             <script>
                 var result = '{{ jsfig | safe }}';
                 var obj = JSON.parse(result);
                 Plotly.newPlot('mydiv', obj);
-            </script></div>
+            </script>
         </div>
     </div>
+</div>
 {% endblock %}

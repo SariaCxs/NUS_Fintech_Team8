@@ -145,12 +145,13 @@ def search_result():
     startdate = request.args.get('startdate')
     enddate = request.args.get('enddate')
     col = request.args.get('col')
+    stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
     #动态可视化
     if col == "":
         ploter.kline(stockcode,startdate,enddate)
-        return render_template('echart_result.html')
+        return render_template('echart_result.html',symbol = stockcode,fullname = stock_name)
     jsfig = ploter.ochl(stockcode,startdate,enddate,col)
-    return render_template('plotly_result.html',jsfig = jsfig)
+    return render_template('plotly_result.html',jsfig = jsfig,symbol = stockcode,fullname = stock_name)
 
 #echart获取
 @app.route('/echart', methods=('GET', 'POST'))
@@ -176,9 +177,22 @@ def indicator_result():
     startdate = request.args.get('startdate')
     enddate = request.args.get('enddate')
     inds = request.args.get('inds')
+    stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
     #动态可视化
     jsfig = ploter.plot_inds(stockcode,startdate,enddate,inds= inds)
-    return render_template('plotly_result.html',jsfig = jsfig)
+    return render_template('plotly_result.html',jsfig = jsfig,symbol= stockcode,fullname = stock_name)
+
+@app.route('/double_result', methods=('GET', 'POST'))
+def double_result():
+    stockcode = request.args.get('stockcode')
+    startdate = ""
+    enddate = ""
+    inds = "EMA-5 EMA-30"
+    stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
+    #动态可视化
+    jsfig = ploter.plot_inds(stockcode,startdate,enddate,inds= inds)
+    ploter.kline(stockcode,startdate,enddate)
+    return render_template('double_result.html',jsfig = jsfig,symbol= stockcode,fullname = stock_name)
 
 #联系我们
 @app.route('/contact', methods=('GET', 'POST'))

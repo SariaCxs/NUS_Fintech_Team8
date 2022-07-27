@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %} Stock Funnel- Search Result{% endblock %}
+{% block content %}
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>  function reinitIframe() {
+    var iframe = document.getElementById("urlIframe");
+    var bHeight = iframe.contentWindow.document.body.scrollHeight;
+    var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
+    var height = Math.max(bHeight, dHeight);
+    iframe.height = height;
+    iframe.height = bHeight;
+    }</script>
+<div class="row vh = 100 bg-light rounded  justify-content-center mx-0 overflow-visible">
+    <div class="col-md-12 pt-4 px-4">
+        <h3>{{ symbol }}</h3>
+        <p>{{ fullname }}</p>
+        <iframe src="{{url_for('echart')}}" width="100%" height="100%" frameborder="0" scrolling="no" id= "urlIframe" onload="reinitIframe()"></iframe>
+        <p>EMA Information</p>
+        <div class='graph' id='mydiv'>
+            <script>
+                var result = '{{ jsfig | safe }}';
+                var obj = JSON.parse(result);
+                Plotly.newPlot('mydiv', obj);
+            </script>
+        </div>
+    </div>
+</div>
+{% endblock %}

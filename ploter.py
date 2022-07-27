@@ -48,7 +48,7 @@ def kline(stockcode,startdate,enddate):
             ),
         ),
         datazoom_opts=[opts.DataZoomOpts(type_="inside")],
-        title_opts=opts.TitleOpts(title="Candlestick Chart of "+ stockcode+ " from " + startdate + " to " + enddate),
+        title_opts=opts.TitleOpts(title="Candlestick Chart from " + startdate + " to " + enddate),
     ))
     c.render('./templates/echart.html')
 
@@ -56,19 +56,20 @@ def ochl(stockcode,startdate,enddate,col):
     data,startdate,enddate = init_data(stockcode,startdate,enddate)
     col = col.split(" ")
     if "Volume" in col and len(col) > 1:
-        fig = make_subplots(rows=2, cols=1,shared_xaxes = True,vertical_spacing=0.1,x_title = "Date",y_title = "Currency in USD")
-        fig.update_layout(title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        fig = make_subplots(rows=2, cols=1,shared_xaxes = True,vertical_spacing=0.1,x_title = "Date")
+        fig.update_yaxes(title_text="Currency in USD", row=1, col=1)
+        fig.update_layout(title = "From "+startdate+" to "+enddate,paper_bgcolor='rgba(243,246,249,0)')
         for each_col in col:
             if each_col != "Volume":
                 fig.add_trace(go.Scatter(x=data['Date'], y=data[each_col], mode = 'lines', name= each_col), row=1, col=1)
             else:
-                fig.add_trace(go.Scatter(x=data['Date'], y=data['Volume'], name='Volume',marker_color = "red"), row=2, col=1)
+                fig.add_trace(go.Scatter(x=data['Date'], y=data['Volume'], name='Volume',mode = 'lines'), row=2, col=1)
     elif "Volume" in col and len(col) == 1:
-        layout = go.Layout(yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        layout = go.Layout(paper_bgcolor='rgba(243,246,249,0)',yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "From "+startdate+" to "+enddate)
         fig = go.Figure(layout = layout)
-        fig.add_trace(go.Scatter(x=data['Date'], y=data['Volume'], name='Volume',model = 'lines'))
+        fig.add_trace(go.Scatter(x=data['Date'], y=data['Volume'], name='Volume',mode = 'lines'))
     else:
-        layout = go.Layout(yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        layout = go.Layout(paper_bgcolor='rgba(243,246,249,0)',yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "From "+startdate+" to "+enddate)
         fig = go.Figure(layout = layout)
         for each_col in col:
             fig.add_trace(go.Scatter(x=data["Date"], y=data[each_col], mode='lines', name=each_col))
@@ -78,11 +79,11 @@ def ochl(stockcode,startdate,enddate,col):
 def plot_inds(stockcode,startdate,enddate,inds):
     startdate,enddate = init_data(stockcode,startdate,enddate)[1],init_data(stockcode,startdate,enddate)[2]
     if "RSI" in inds and len(inds.split(" ")) == 1:
-        layout = go.Layout(yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        layout = go.Layout(paper_bgcolor='rgba(243,246,249,0)',yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "From "+startdate+" to "+enddate)
         fig = go.Figure(layout = layout)
         RSI(stockcode,startdate,enddate,inds,fig)
     elif "RSI" not in inds:
-        layout = go.Layout(yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        layout = go.Layout(paper_bgcolor='rgba(243,246,249,0)',yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "From "+startdate+" to "+enddate)
         fig = go.Figure(layout = layout)
         inds = inds.split(" ")
         for ind in inds:
@@ -91,8 +92,9 @@ def plot_inds(stockcode,startdate,enddate,inds):
             if ind == 'MACD':
                 MACD(stockcode,startdate,enddate,fig)
     else:
-        fig = make_subplots(rows=2, cols=1,shared_xaxes = True,vertical_spacing=0.1,x_title = "Date",y_title = "Currency in USD")
-        fig.update_layout(title = "Result of "+stockcode+" from "+startdate+" to "+enddate)
+        fig = make_subplots(rows=2, cols=1,shared_xaxes = True,vertical_spacing=0.1,x_title = "Date")
+        fig.update_yaxes(title_text="Currency in USD", row=1, col=1)
+        fig.update_layout(paper_bgcolor='rgba(243,246,249,0)',title = "From "+startdate+" to "+enddate)
         inds = inds.split(" ")
         for ind in inds:
             if "EMA" in ind or "SMA" in ind:
