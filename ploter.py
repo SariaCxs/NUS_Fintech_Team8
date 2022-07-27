@@ -153,9 +153,12 @@ def RSI(stockcode,startdate,enddate,ind,fig,flag = False):
         fig.add_trace(go.Scatter(x=data["Date"], y=data["rsi"], mode='lines', name="RSI" + "-" + days))
 
 def MACD(stockcode,startdate,enddate,fig,flag = False):
+    startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
+    startdate = startdate - pd.tseries.offsets.BDay(1)
+    startdate = str(startdate).split(" ")[0]
     data = init_data(stockcode,startdate,enddate)[0]
-    E12 = pd.Series(data['Close'].ewm(span=12, min_periods=12).mean())
-    E26 = pd.Series(data['Close'].ewm(span=26, min_periods=26).mean())
+    E12 = pd.Series(data['Close'].ewm(12).mean().shift())
+    E26 = pd.Series(data['Close'].ewm(26).mean().shift())
     MACD = pd.Series(E12 - E26)
     if flag == True:
         fig.add_trace(go.Scatter(x=data["Date"], y=MACD, mode='lines', name='MACD'),row=1,col=1)

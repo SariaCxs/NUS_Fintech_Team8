@@ -3,6 +3,9 @@
 - flask
 - pyecharts
 - plotly
+- pandas
+- pandas_datareader
+- openpyxl
 ## 改动日志
 ### V1.3
 
