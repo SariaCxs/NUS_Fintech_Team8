@@ -23,8 +23,10 @@ class Filter():
         Returns:
         stocks: the code of stock
         '''
+        out_indicators = []
         if sector is not None:
             result = self.data[self.data['sector'] == sector]
+            out_indicators.append({'name':'sector','value':sector})
         else:
             result = self.data.copy()
         if len(indicators)>0:
@@ -32,9 +34,10 @@ class Filter():
                 col = indicators[ind]
                 col_name = self.indicator_pool[ind][int(col)]
                 result = result[result[col_name] == 1]
+                out_indicators.append({'name':ind,'value':col_name})
         code = result['code'].values
 
-        return code
+        return code,out_indicators
 
 
 

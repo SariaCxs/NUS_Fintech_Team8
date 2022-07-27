@@ -62,11 +62,12 @@ def recommend():
     if request.method == 'POST':
         if request.form.get('SECTOR') == '1':
             sector = request.form.get('sector')
-            sec_code = filter.filt({}, sector)
+            sec_code, indicators = filter.filt({}, sector)
             code = sorted(list(set(code).intersection(set(sec_code))))
             result = toFormat(code, data)
     if len(result)>0:
         cols = [key for key in result[0].keys()]
+        del cols[1]
     else:
         cols = []
     return render_template('recommend.html', type=type, stocks=result, cols=cols,date=daily_data[0]['Date'])
@@ -75,11 +76,9 @@ def recommend():
 @app.route('/select',methods=['GET','POST'])
 def select_stock():
     #get 显示当日数据 列表存储
-    result = daily_data
-    global data
-    global code
     if request.method == 'POST':
-        #根据args进行判断
+        global data
+        global code
         global filter
         filter_indicators = {}
         sector = None
@@ -88,14 +87,15 @@ def select_stock():
         for ind in filter.indicator_pool.keys():
             if request.form.get(ind.upper()) == '1':
                 filter_indicators[ind] = request.form.get(ind.lower())
-        code = filter.filt(filter_indicators,sector)
+        code, indicators = filter.filt(filter_indicators,sector)
         result = toFormat(code, data)
-    if len(result)>0:
-        cols = [key for key in result[0].keys()]
-        del cols[1]
-    else:
-        cols = []
-    return render_template('select.html',stocks=result,cols=cols,date=daily_data[0]['Date'])
+        if len(result)>0:
+            cols = [key for key in result[0].keys()]
+            del cols[1]
+        else:
+            cols = []
+        return render_template('stock_result.html', indicators = indicators, stocks=result, cols=cols, date=daily_data[0]['Date'])
+    return render_template('select.html')
 
 @app.route('/rank', methods=['GET'])
 def rank():

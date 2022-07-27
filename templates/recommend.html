@@ -7,9 +7,10 @@
 <div class="row vh-100 bg-light rounded  justify-content-center mx-0 overflow-auto">
     <div class="col-md-12 pt-4 px-4"> 
         <h3>Your Customized Stock Funnel</h3>
-        <p>From the previous questionnaire, we obtained your investment type as <mark>{{type}}</mark>.
-            <br>And according to your type, we recommend the following stock for you. Stocks are ranked ascend in Rise.
-        </p>
+        <p></p>
+        <p>From the previous questionnaire, we obtained your investment type as <mark><b>{{type}}</b></mark>.</p>
+        <p>According to your type, we recommend the following stocks for you.</p>
+        <p>You can also choose sector that you want to check. </p>
         <form method="post">
             <div>
             <input class="form-check-input" type="checkbox" value="1" name="SECTOR" id="sector">
@@ -32,9 +33,9 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         <hr>
-        <h6 >Number of stocks selected for you: {{stocks | length}}</h6>
-        <h6>Update on: {{date}}</h6>
         <a href="/rank" ><input style="float:right" class="btn btn-primary mt-2"  type="button"  value="Rank" /></a>
+        <p >Number of stocks selected for you: <b>{{stocks | length}}</b></p>
+        <p>Update on: <b>{{date}}</b></p>
         <table class="table table-hover">
         <thead>
             <tr>

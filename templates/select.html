@@ -4,12 +4,11 @@
 {% block content %}
 <div class="row vh-100 bg-light rounded align-items-center justify-content-center mx-0 overflow-auto">
     <div class="col-md-12 pt-4 px-4">
-
-
     <h3>Your Stock Funnel's Selection</h3>
-        <p>You can click on the ticker symbol in the table to see a visualization of its high and low prices for the last 2 months.</p>
+        <p>Here you can select the checkbox and choose specific trading signal for filtering stocks.</p>
+        <hr>
     <form method="post">
-        <h4>Choose sector</h4>
+        <h5>Choose sector</h5>
         <div>
             <input class="form-check-input" type="checkbox" value="1" name="SECTOR" id="sector">
                                 <label class="form-check-label" for="sector">
@@ -27,7 +26,8 @@
                     <option value="Consumer Defensive">Consumer Defensive</option>
                 </select>
         </div>
-        <h4>Choose technique indicators</h4>
+        <hr>
+        <h5>Choose technique indicators</h5>
         <div>
             <input class="form-check-input" type="checkbox" value="1" name="KDJ" id="select_check_1">
                                 <label class="form-check-label" for="select_check_1">
@@ -100,34 +100,7 @@
         </div>
         <button type="submit" name="submit" class="btn btn-primary mt-2">Submit</button>
     </form>
-    <br>
-        <h6 >Number of stocks selected for you: {{stocks | length}}</h6>
-        <h6>Update on {{date}}</h6>
-        <a href="/rank" ><input style="float:right" class="btn btn-primary mt-2"  type="button"  value="Rank" /></a>
-        <table class="table table-hover">
-        <thead>
-            <tr>
-                {% for col in cols %}
 
-                        <th scope="col">{{col}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for stock in stocks %}
-            <tr>
-                <th scope="row"> 
-                    <!-- <a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a> -->
-                <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a>
-                </th>
-                {% for col in cols[1:] %}
-                    <th>{{stock[col]}}</th>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
 </div>
 </div>
 

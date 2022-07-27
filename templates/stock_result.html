@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %} Stock Funnel- Select{% endblock %}
+{% block content %}
+<div class="row vh-100 bg-light rounded align-items-center justify-content-center mx-0 overflow-auto">
+    <div class="col-md-12 pt-4 px-4">
+        <h3>Your Stock Funnel's Result</h3>
+        <hr>
+        {% for ind in indicators %}
+        <p>{{ind.name}} : <b>{{ind.value}}</b></p>
+        {% endfor %}
+        <hr>
+        <p>Based on the above conditions, we filter out the following stocks for you.</p>
+        <a href="/rank" ><input style="float:right" class="btn btn-primary mt-2"  type="button"  value="Rank" /></a>
+        <p>Number of stocks selected for you: <b>{{stocks | length}}</b></p>
+        <p>Update on <b>{{date}}</b></p>
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                {% for col in cols %}
+
+                        <th scope="col">{{col}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <th scope="row">
+                    <!-- <a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a> -->
+                <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a>
+                </th>
+                {% for col in cols[1:] %}
+                    <th>{{stock[col]}}</th>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+
+</div>
+</div>
+
+{% endblock %}

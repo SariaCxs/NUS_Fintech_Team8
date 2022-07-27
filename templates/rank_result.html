@@ -7,13 +7,12 @@
 
 
     <h3>AI Ranking For Stocks</h3>
+        <p>The alogorithm further selects better stocks from stocks you choose and ranks them.</p>
         <p>The ranking result is based on indicators including alpha and beta value.</p>
-        <p>Better stocks are picked by our algorithm.</p>
         <p>The higher its rank is, the higher possibility that it can gain excess earnings.</p>
-        <br>
+        <hr>
         <p>You can click on the ticker symbol in the table to see a visualization of its high and low prices for the last 2 months.</p>
-    <h6>Update on: {{date}}</h6>
-    <br>
+        <p>Update on: {{date}}</p>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -26,7 +25,7 @@
         <tbody>
             {% for stock in stocks %}
             <tr>
-                <th scope="row"> <a href="{{ url_for('search_result', stockcode=stock['code'],startdate='',enddate='',col='') }}">{{stock.code}}</a></th>
+                <th scope="row"> <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a></th>
                 <th>{{stock['Close']}}</th>
                 <th>{{stock['Change']}}</th>
                 <th>{{stock['TotalYield']}}</th>
