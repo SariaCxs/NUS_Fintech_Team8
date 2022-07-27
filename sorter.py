@@ -72,9 +72,8 @@ class KMeansSorter():
 
 
 
-        KmeansTypeAmount = 10
-        Core_mat = np.empty(shape=[0, 1])
-        Core_count = np.zeros(KmeansTypeAmount)
+
+
 
         for DATA in Data_mat:
             if np.isnan(DATA).any():
@@ -85,7 +84,9 @@ class KMeansSorter():
             else:
                 COUNTDEL += 1
 
-        print(Data_mat.shape)
+        KmeansTypeAmount = min(10,len(Data_mat))
+        Core_mat = np.empty(shape=[0, 1])
+        Core_count = np.zeros(KmeansTypeAmount)
 
         kmeans = KMeans(n_clusters=KmeansTypeAmount, random_state=0).fit(Data_mat)
 

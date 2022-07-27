@@ -239,7 +239,6 @@ def fetch_data():
 
 
     daily_data = toFormat(data.keys(),data)
-    print(daily_data)
 
 #取code中每支股票的第一行，转换成前端的输出格式
 def toFormat(code,df):
