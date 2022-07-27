@@ -1,4 +1,3 @@
-import tushare as ts
 from filter import Filter
 from sorter import KMeansSorter
 
@@ -133,7 +132,7 @@ def search():
         enddate = request.form['enddate']
         col = request.form['col']
         # 接受用户参数传入
-        if startdate > enddate or stockcode =="":
+        if startdate > enddate or stockcode =="" or col == "":
             return render_template('404.html')
         return redirect(url_for('search_result', stockcode=stockcode, startdate=startdate, enddate=enddate, col=col))
     return render_template('search.html')
@@ -148,14 +147,14 @@ def search_result():
     col = request.args.get('col')
     stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
     #动态可视化
-    if col == "":
+    if col == "Candlestick":
         ploter.kline(stockcode,startdate,enddate)
         return render_template('echart_result.html',symbol = stockcode,fullname = stock_name)
     jsfig = ploter.ochl(stockcode,startdate,enddate,col)
     return render_template('plotly_result.html',jsfig = jsfig,symbol = stockcode,fullname = stock_name)
 
 #echart获取
-@app.route('/echart', methods=('GET', 'POST'))
+@app.route('/echart', methods=['GET'])
 def echart():
     return render_template('echart.html')
 
@@ -167,7 +166,7 @@ def search_indicator():
         enddate = request.form['enddate']
         inds = request.form['inds']
         # 接受用户参数传入
-        if startdate > enddate or stockcode =="":
+        if startdate > enddate or stockcode =="" or inds == "":
             return render_template('404.html')
         return redirect(url_for('indicator_result', stockcode=stockcode, startdate=startdate, enddate=enddate, inds=inds))
     return render_template('search_indicator.html')
@@ -196,9 +195,13 @@ def double_result():
     return render_template('double_result.html',jsfig = jsfig,symbol= stockcode,fullname = stock_name)
 
 #联系我们
-@app.route('/contact', methods=('GET', 'POST'))
+@app.route('/contact', methods=['GET'])
 def contact():
     return render_template('contact.html')
+
+@app.route('/guide', methods=['GET'])
+def guide():
+    return render_template('guide.html')
 
 @app.before_request
 def if_fetch():
