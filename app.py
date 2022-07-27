@@ -54,10 +54,10 @@ def survey():
 def recommend():
     global data
     global filter
+    global code
     type = request.args.get('type')
     score = request.args.get('score')
 
-    #fetch data according to type
     code = CLASSIFICATION[int(score)][str(score)]
     result = toFormat(code, data)
     if request.method == 'POST':
@@ -70,7 +70,7 @@ def recommend():
         cols = [key for key in result[0].keys()]
     else:
         cols = []
-    return render_template('recommend.html', type=type, stocks=result, cols=cols)
+    return render_template('recommend.html', type=type, stocks=result, cols=cols,date=daily_data[0]['Date'])
 
 
 @app.route('/select',methods=['GET','POST'])
@@ -96,7 +96,6 @@ def select_stock():
         del cols[1]
     else:
         cols = []
-    print(daily_data)
     return render_template('select.html',stocks=result,cols=cols,date=daily_data[0]['Date'])
 
 @app.route('/rank', methods=['GET'])
