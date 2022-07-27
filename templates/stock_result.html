@@ -19,19 +19,19 @@
             <tr>
                 {% for col in cols %}
 
-                        <th scope="col">{{col}}</th>
+                        <th scope="col" style = 'text-align:center'>{{col}}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% for stock in stocks %}
             <tr>
-                <th scope="row">
+                <th scope="row" style = 'text-align:center'>
                     <!-- <a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a> -->
                 <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a>
                 </th>
                 {% for col in cols[1:] %}
-                    <th>{{stock[col]}}</th>
+                    <th style = 'text-align:center'>{{stock[col]}}</th>
                 {% endfor %}
             </tr>
             {% endfor %}
