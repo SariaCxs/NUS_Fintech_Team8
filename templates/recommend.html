@@ -7,8 +7,7 @@
 <div class="row vh-100 bg-light rounded  justify-content-center mx-0 overflow-auto">
     <div class="col-md-12 pt-4 px-4"> 
         <h3>Your Customized Stock Funnel</h3>
-        <p></p>
-        <p>From the previous questionnaire, we obtained your investment type as <mark><b>{{type}}</b></mark>.</p>
+        <p class = "pt-4">From the previous questionnaire, we obtained your investment type as <mark><b>{{type}}</b></mark>.</p>
         <p>According to your type, we recommend the following stocks for you.</p>
         <p>You can also choose sector that you want to check. </p>
         <form method="post">
@@ -48,7 +47,6 @@
             {% for stock in stocks %}
             <tr>
                 <th style = 'text-align:center' scope="row">
-                <!-- <a href="{{ url_for('search_result', stockcode=stock['code'], startdate='',enddate='',col='') }}">{{stock.code}}</a> -->
                 <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a>
             </th>
                 {% for col in cols[1:] %}

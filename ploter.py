@@ -3,11 +3,11 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from pyecharts import options as opts
 from pyecharts.charts import Kline
-import plotly.offline as py
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 def init_data(stockcode,startdate,enddate):
+    # Get the data by date range symbol 
     now = datetime.datetime.now()
     if startdate == "" and enddate == "":
         enddate = str(now.date())
@@ -17,6 +17,7 @@ def init_data(stockcode,startdate,enddate):
     return data,startdate,enddate
 
 def kline(stockcode,startdate,enddate):
+    # generate the candlestick chart
     data,startdate,enddate = init_data(stockcode,startdate,enddate)
     dates = pd.Series.tolist(data["Date"])
     data = data.iloc[:,1:5]
@@ -25,7 +26,6 @@ def kline(stockcode,startdate,enddate):
     for i in range(data.shape[0]):
         row = pd.Series.tolist(data.iloc[i,:])
         dflist.append(row)
-    #画图
     c = (
     Kline()
     .add_xaxis(dates)
@@ -53,6 +53,7 @@ def kline(stockcode,startdate,enddate):
     c.render('./templates/echart.html')
 
 def ochl(stockcode,startdate,enddate,col):
+    # generate the "Open" ... "Volume" chart
     data,startdate,enddate = init_data(stockcode,startdate,enddate)
     col = col.split(" ")
     if "Volume" in col and len(col) > 1:
@@ -77,6 +78,7 @@ def ochl(stockcode,startdate,enddate,col):
     return jsfig
 
 def plot_inds(stockcode,startdate,enddate,inds):
+    # plot complex indicators like RSI ... MACD
     startdate,enddate = init_data(stockcode,startdate,enddate)[1],init_data(stockcode,startdate,enddate)[2]
     if "RSI" in inds and len(inds.split(" ")) == 1:
         layout = go.Layout(paper_bgcolor='rgba(243,246,249,0)',yaxis=dict(title='Currency in USD'),xaxis = dict(title = "Date"),title = "From "+startdate+" to "+enddate)
@@ -103,7 +105,6 @@ def plot_inds(stockcode,startdate,enddate,inds):
                 MACD(stockcode,startdate,enddate,fig,True)
             if "RSI" in ind:
                 RSI(stockcode,startdate,enddate,ind,fig,True)
-
     jsfig=fig.to_json()
     return jsfig
 
@@ -127,7 +128,9 @@ def MA(stockcode,startdate,enddate,ind,fig,flag = False):
     else:
         fig.add_trace(go.Scatter(x=data["Date"], y=data[kind], mode='lines', name=kind + "-" + days))
 
+
 def RSI_converter(df,days):
+    # Get the RSI value
     diff = df['Close'].diff()[1:]
     Up = diff.copy()
     Down = diff.copy()
@@ -139,7 +142,9 @@ def RSI_converter(df,days):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
+
 def RSI(stockcode,startdate,enddate,ind,fig,flag = False):
+    # Plot the RSI value
     days = ind.split("-")[1]
     startdate = datetime.datetime.strptime(startdate,'%Y-%m-%d')
     startdate = startdate - pd.tseries.offsets.BDay(int(days))

@@ -1,3 +1,4 @@
+# Load the libraries
 from filter import Filter
 from sorter import KMeansSorter
 
@@ -11,15 +12,13 @@ import pandas as pd
 from pandas_datareader import data
 import json
 from util.getInvestType import InvestSurvey
+
 app = Flask(__name__)
-#更新静态文件，否则echart无法加载
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 CODE_LIST = pd.read_csv("./data/Runes_clean.csv")['Rune']
 with open('./data/classification.json','r',encoding='utf8')as fp:
     CLASSIFICATION = json.load(fp)
-
-
 
 sorter = KMeansSorter()
 filter = Filter()
@@ -48,7 +47,6 @@ def survey():
 
     return render_template('survey.html')
 
-
 @app.route('/recommend',methods=['GET','POST'])
 def recommend():
     global data
@@ -75,7 +73,7 @@ def recommend():
 
 @app.route('/select',methods=['GET','POST'])
 def select_stock():
-    #get 显示当日数据 列表存储
+    # get the daily data and storage them in a list
     if request.method == 'POST':
         global data
         global code
@@ -126,18 +124,18 @@ def toRankFormat(code,df):
 @app.route('/search', methods=('GET', 'POST'))
 def search():
     if request.method == 'POST':
+        # get the user input
         stockcode = request.form['stockcode']
         startdate = request.form['startdate']
         enddate = request.form['enddate']
         col = request.form['col']
-        # 接受用户参数传入
         if startdate > enddate or stockcode =="" or col == "":
             return render_template('404.html')
         return redirect(url_for('search_result', stockcode=stockcode, startdate=startdate, enddate=enddate, col=col))
     return render_template('search.html')
 
 
-# 可视化结果
+# get the visualization
 @app.route('/search_result', methods=('GET', 'POST'))
 def search_result():
     stockcode = request.args.get('stockcode')
@@ -145,14 +143,14 @@ def search_result():
     enddate = request.args.get('enddate')
     col = request.args.get('col')
     stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
-    #动态可视化
+    # use pyecharts
     if col == "Candlestick":
         ploter.kline(stockcode,startdate,enddate)
         return render_template('echart_result.html',symbol = stockcode,fullname = stock_name)
     jsfig = ploter.ochl(stockcode,startdate,enddate,col)
     return render_template('plotly_result.html',jsfig = jsfig,symbol = stockcode,fullname = stock_name)
 
-#echart获取
+# render the pyechart
 @app.route('/echart', methods=['GET'])
 def echart():
     return render_template('echart.html')
@@ -164,7 +162,6 @@ def search_indicator():
         startdate = request.form['startdate']
         enddate = request.form['enddate']
         inds = request.form['inds']
-        # 接受用户参数传入
         if startdate > enddate or stockcode =="" or inds == "":
             return render_template('404.html')
         return redirect(url_for('indicator_result', stockcode=stockcode, startdate=startdate, enddate=enddate, inds=inds))
@@ -177,7 +174,6 @@ def indicator_result():
     enddate = request.args.get('enddate')
     inds = request.args.get('inds')
     stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
-    #动态可视化
     jsfig = ploter.plot_inds(stockcode,startdate,enddate,inds= inds)
     return render_template('plotly_result.html',jsfig = jsfig,symbol= stockcode,fullname = stock_name)
 
@@ -188,12 +184,10 @@ def double_result():
     enddate = ""
     inds = "EMA-5 EMA-30"
     stock_name = pd.read_excel('./data/symbol_name.xlsx').set_index("ID").to_dict()["Name"][stockcode]
-    #动态可视化
     jsfig = ploter.plot_inds(stockcode,startdate,enddate,inds= inds)
     ploter.kline(stockcode,startdate,enddate)
     return render_template('double_result.html',jsfig = jsfig,symbol= stockcode,fullname = stock_name)
 
-#联系我们
 @app.route('/contact', methods=['GET'])
 def contact():
     return render_template('contact.html')
@@ -214,15 +208,12 @@ def parse_user_type(answers):
     return type[0]
 
 
-
-
 # def df2dic(code,df):
 #     dic = {}
 #     dic['code'] = code
 #     for col in df:
 #         dic[col] = df.iloc[-1,:][col]
 #     return dic
-
 
 def fetch_data():
     global data
@@ -240,7 +231,7 @@ def fetch_data():
 
     daily_data = toFormat(data.keys(),data)
 
-#取code中每支股票的第一行，转换成前端的输出格式
+# Take the first line of each stock in the code and convert it to the front-end output format
 def toFormat(code,df):
     result = []
     for stock in code:
@@ -254,5 +245,3 @@ def toFormat(code,df):
 
 if __name__ == "__main__":
     app.run(port=5000)
-    
-

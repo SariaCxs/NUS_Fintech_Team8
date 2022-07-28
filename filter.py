@@ -4,7 +4,6 @@ class Filter():
         '''
         filter stock by indicators and industries
         '''
-        #改用配置文件读取
         self.industries = ['Financial Services','Energy Healthcare','Technology','Utilities','Industrials','Basic Materials',
             'Communication Services','Consumer Cyclical','Consumer Defensive']
         self.indicator_pool = {'kdj':['kdj_golden_cross', 'kdj_death_cross', 'kdj_oversold', 'kdj_overbought'], 'bias':['bias_golden_cross', 'bias_death_cross'],

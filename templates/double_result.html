@@ -3,18 +3,19 @@
 {% block content %}
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>  function reinitIframe() {
-    var iframe = document.getElementById("urlIframe");
-    var bHeight = iframe.contentWindow.document.body.scrollHeight;
-    var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
-    var height = Math.max(bHeight, dHeight);
-    iframe.height = height;
-    iframe.height = bHeight;
+        var iframe = document.getElementById("urlIframe");
+        var bHeight = iframe.contentWindow.document.body.scrollHeight;
+        var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
+        var height = Math.max(bHeight, dHeight);
+        iframe.height = height;
+        iframe.height = bHeight;
     }</script>
 <div class="row vh = 100 bg-light rounded  justify-content-center mx-0 overflow-visible">
     <div class="col-md-12 pt-4 px-4">
         <h3>{{ symbol }}</h3>
         <p>{{ fullname }}</p>
-        <iframe src="{{url_for('echart')}}" width="100%" height="100%" frameborder="0" scrolling="no" id= "urlIframe" onload="reinitIframe()"></iframe>
+        <iframe src="{{url_for('echart')}}" width="100%" height="100%" frameborder="0" scrolling="no" id="urlIframe"
+            onload="reinitIframe()"></iframe>
         <h5>EMA (5 days and 30 days)</h5>
         <div class='graph' id='mydiv'>
             <script>

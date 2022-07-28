@@ -1,7 +1,7 @@
 import pandas as pd
 
 sector = ['']
-df = pd.read_excel('sectors.xlsx',sheet_name=None)
+df = pd.read_excel('sectors.xlsx', sheet_name=None)
 stock_info = pd.read_csv('daily_data.csv')
 stock_code = stock_info['code']
 stock_sector = []
@@ -16,4 +16,4 @@ for code in stock_code:
     stock_sector.append(sector)
 
 stock_info['sector'] = stock_sector
-stock_info.to_csv('daily_data.csv',encoding='utf-8',index=False)
+stock_info.to_csv('daily_data.csv', encoding='utf-8', index=False)

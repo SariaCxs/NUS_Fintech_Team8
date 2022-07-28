@@ -6,35 +6,37 @@
     <div class="col-md-12 pt-4 px-4">
 
 
-    <h3>AI Ranking For Stocks</h3>
+        <h3>AI Ranking For Stocks</h3>
         <p>The alogorithm further selects better stocks from stocks you choose and ranks them.</p>
         <p>The ranking result is based on indicators including alpha and beta value.</p>
         <p>The higher its rank is, the higher possibility that it can gain excess earnings.</p>
         <hr>
-        <p>You can click on the ticker symbol in the table to see a visualization of its high and low prices for the last 2 months.</p>
+        <p>You can click on the ticker symbol in the table to see a visualization of its high and low prices for the
+            last 2 months.</p>
         <p>Update on: {{date}}</p>
         <table class="table table-hover">
-        <thead>
-            <tr>
-                {% for col in cols %}
+            <thead>
+                <tr>
+                    {% for col in cols %}
 
-                        <th scope="col" style = 'text-align:center'>{{col}}</th>
+                    <th scope="col" style='text-align:center'>{{col}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <th scope="row" style='text-align:center'> <a
+                            href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a></th>
+                    <th style='text-align:center'>{{stock['Close']}}</th>
+                    <th style='text-align:center'>{{stock['Change']}}</th>
+                    <th style='text-align:center'>{{stock['TotalYield']}}</th>
+                </tr>
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for stock in stocks %}
-            <tr>
-                <th scope="row" style = 'text-align:center'> <a href="{{ url_for('double_result', stockcode=stock['code']) }}">{{stock.code}}</a></th>
-                <th style = 'text-align:center'>{{stock['Close']}}</th>
-                <th style = 'text-align:center'>{{stock['Change']}}</th>
-                <th style = 'text-align:center'>{{stock['TotalYield']}}</th>
-            </tr>
-            {% endfor %}
-        </tbody>
+            </tbody>
 
-    </table>
-</div>
+        </table>
+    </div>
 </div>
 
 {% endblock %}
