@@ -216,7 +216,7 @@ def RSI(rsidata):
 
     # 判断是否超卖
     if rsidata.RSI1.values[-1] <= 20 and rsidata.RSI2.values[-1] <= 20 and rsidata.RSI3.values[-1] <= 20:
-        rsi['overbought'] = 1
+        rsi['oversold'] = 1
 
     # 判断是否超买
     if rsidata.RSI1.values[-1] >= 80 and rsidata.RSI2.values[-1] >= 80 and rsidata.RSI3.values[-1] >= 80:
