@@ -147,18 +147,18 @@ def BOLL(bolldata):
     bolldata['UB'] = bolldata['BOLL'] + 2 * bolldata['Close'].rolling(N).std()
     bolldata['LB'] = bolldata['BOLL'] - 2 * bolldata['Close'].rolling(N).std()
 
-    # 判断三天内是否突破上轨
+    # judge whether cross upper within three days
     for i in range(3):
         if bolldata.Close.values[-i - 2] < bolldata.UB.values[-i - 2] and bolldata.Close.values[-i - 1] > bolldata.UB.values[-i - 1]:
             boll['high_break'] = 1
             break
-    # 判断三天内是否突破中轨
+    # judge whether cross mid within three days
     for i in range(3):
         if bolldata.Close.values[-i - 2] < bolldata.BOLL.values[-i - 2] and bolldata.Close.values[-i - 1] > bolldata.BOLL.values[-i - 1]:
             boll['mid_break'] = 1
             break
 
-    # 判断三天内是否突破下轨
+    # judge whether cross lower within three days
     for i in range(3):
         if bolldata.Close.values[-i - 2] < bolldata.LB.values[-i - 2] and bolldata.Close.values[-i - 1] > bolldata.LB.values[-i - 1]:
             boll['low_break'] = 1
@@ -214,11 +214,11 @@ def RSI(rsidata):
     if death1 & death2:
         rsi['death_cross'] = 1
 
-    # 判断是否超卖
+    # judge whether oversold
     if rsidata.RSI1.values[-1] <= 20 and rsidata.RSI2.values[-1] <= 20 and rsidata.RSI3.values[-1] <= 20:
         rsi['oversold'] = 1
 
-    # 判断是否超买
+    # judge whether overbought
     if rsidata.RSI1.values[-1] >= 80 and rsidata.RSI2.values[-1] >= 80 and rsidata.RSI3.values[-1] >= 80:
         rsi['overbought'] = 1
 
