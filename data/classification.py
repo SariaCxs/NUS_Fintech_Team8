@@ -5,7 +5,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
-# 计算个股月风险价值:历史模拟法和方差-协方差法的平均值
+# calculate risk value for stock
 def var(data):
 
     #data = data.DataReader(stock ,start='2016' ,end='2020' ,data_source='yahoo')
@@ -33,10 +33,9 @@ def var(data):
     return (var1 +var2 ) /2
 
 
-# 为风险承受力高的用户筛选极端收益可能更高的股票
+# sift profitable stocks for users with high risk tolerance
 def gainandbeta(data, ben):
 
-    # 计算极端收益
     data2 = data
     spy = ben
 
@@ -69,7 +68,7 @@ def gainandbeta(data, ben):
     return beta, ((gain1 + gain2) / 2)
 
 
-#筛选长线股票
+#screen long term result
 def longterm(longdata):
     #longdata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
     # longdata = pd.read_csv(f'StockData/{stock}.csv')
@@ -81,7 +80,7 @@ def longterm(longdata):
     else:
         return True
 
- #筛选中线股票
+ #screen mid term result
 def midterm(middata):
     #middata = data.DataReader(stock,start='2021',end='2022',data_source='yahoo')
 
@@ -92,9 +91,9 @@ def midterm(middata):
     else:
         return True
 
-    # 筛选短线股票
 
 
+# screen long term result
 def shortterm(data, ben):
     shortdata = data
     spy = ben
@@ -129,7 +128,7 @@ def shortterm(data, ben):
         return False
 
 
-# 根据投资偏好筛选
+# screen based on user preference
 def coarse_sizing(stocks):
     risk0long = []
     risk0mid = []
@@ -215,7 +214,7 @@ def short_line_parameters(history):
     return returns_above_mean, returns_above_var
 
 if __name__ == '__main__':
-    # 对股票进行分类
+    #classify stocks
     import json
 
     STOCK_LIST = pd.read_csv('Runes_clean.csv')['Rune']
