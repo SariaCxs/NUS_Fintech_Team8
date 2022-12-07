@@ -1,3 +1,9 @@
+## developer list
+- Huaqiu Liu
+- Xiaoshan Chen
+- Jiawei Huang
+- Huanzhang Shen
+
 ## User Guideline
 ---
 [Stock Funnel](http://101.34.65.50:5007/) is a simple, free and no login stock picking assistant based on `Python` , `Flask`  and `Bootstrap` . It uses some simple financial indicators to determine your type of investment and can find the best stock for you from thousands of stocks by K-means algorithm. 
@@ -107,8 +113,3 @@ Similarly, you can query one or more indicators at the same time, just separate 
 
 > MACD-7
 
-## developer list
-- Huaqiu Liu
-- Xiaoshan Chen
-- Jiawei Huang
-- Huanzhang Shen
