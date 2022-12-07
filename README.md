@@ -107,5 +107,8 @@ Similarly, you can query one or more indicators at the same time, just separate 
 
 > MACD-7
 
-
-
+## developer list
+- Huaqiu Liu
+- Xiaoshan Chen
+- Jiawei Huang
+- Huanzhang Shen
