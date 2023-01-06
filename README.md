@@ -1,3 +1,10 @@
+## How it looks like
+
+
+https://user-images.githubusercontent.com/67886071/210935716-8fff6d7f-2b24-40fb-9e3c-7a3e4ba5a6ce.mp4
+
+
+
 ## developer list
 - Huaqiu Liu
 - Xiaoshan Chen
